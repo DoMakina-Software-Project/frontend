@@ -8,7 +8,7 @@ const SuperAdminRoutes = () => {
 		return <Navigate to="/login" />;
 	}
 
-	if (!currentUser?.isActive) {
+	if (currentUser?.status === "INACTIVE") {
 		return <Navigate to="/onboarding" />;
 	}
 

@@ -8,7 +8,7 @@ const AuthRoutes = () => {
 		return <Outlet />;
 	}
 
-	if (!currentUser?.isActive) {
+	if (currentUser?.status === "INACTIVE") {
 		return <Navigate to="/onboarding" />;
 	}
 

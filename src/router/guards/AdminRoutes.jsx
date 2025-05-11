@@ -8,7 +8,7 @@ const AdminRoutes = () => {
 		return <Navigate to="/login" />;
 	}
 
-	if (!currentUser?.isActive) {
+	if (!currentUser?.status === "ACTIVE") {
 		return <Navigate to="/onboarding" />;
 	}
 

@@ -23,7 +23,7 @@ const VerifyEmailTokenPage = () => {
 	useEffect(() => {
 		const verifyAndFetchUser = async () => {
 			const data = await handleApiCall({ token });
-			if (data && currentUser?.isactive === false) {
+			if (data && currentUser?.status === "INACTIVE") {
 				await fetchUser();
 			}
 		};
