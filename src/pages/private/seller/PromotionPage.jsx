@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Input } from "../../../components/ui";
 
 import { useApi } from "../../../hooks";
-import { createPromotion } from "../../../api/private";
+import { createPromotion } from "../../../api/seller";
 import { getPromotionPrice } from "../../../api/public";
 import { useNavigate, useParams } from "react-router-dom";
 import { MainLayout } from "../../../components/layouts";

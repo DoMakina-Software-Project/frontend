@@ -6,7 +6,7 @@ import {
 	deleteCar,
 	updateIsSold,
 	deletePromotion,
-} from "../../../api/private";
+} from "../../../api/seller";
 
 import { useNavigate } from "react-router-dom";
 

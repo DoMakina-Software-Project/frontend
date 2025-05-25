@@ -1,7 +1,7 @@
 import { MainLayout } from "../../../components/layouts";
 import { Button, Input, TextArea } from "../../../components/ui";
 import { useEffect, useState } from "react";
-import { createCar } from "../../../api/private";
+import { createCar } from "../../../api/seller";
 import { getAllBrands } from "../../../api/public";
 import { useApi } from "../../../hooks";
 import { useNavigate } from "react-router-dom";

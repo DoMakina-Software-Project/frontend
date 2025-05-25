@@ -1,13 +1,13 @@
 import { MainLayout } from "../../../components/layouts";
 import BrandTable from "../../../components/pages/Admin/BrandTable";
 import { useNavigate } from "react-router-dom";
-import { deleteBrand } from "../../../api/admin";
+import { deleteBrand } from "../../../api/staff";
 import { getAllBrands } from "../../../api/public";
 import { useApi } from "../../../hooks";
 import { useEffect, useState } from "react";
 import { Button } from "../../../components/ui";
 
-const AdminBrandsPage = () => {
+const StaffBrandsPage = () => {
 	const navigate = useNavigate();
 	const { handleApiCall: getBrandsApiCall } = useApi(getAllBrands);
 	const { handleApiCall: deleteBrandApiCall } = useApi(deleteBrand);
@@ -57,4 +57,4 @@ const AdminBrandsPage = () => {
 	);
 };
 
-export default AdminBrandsPage;
+export default StaffBrandsPage;

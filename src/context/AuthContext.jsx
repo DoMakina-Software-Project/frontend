@@ -9,24 +9,51 @@ export const AuthProvider = ({ children }) => {
 	const { handleApiCall: handleLogoutApiCall } = useApi(logout);
 
 	const [currentUser, setCurrentUser] = useState(null);
+	const [selectedRole, setSelectedRole] = useState(null);
+
 	const [loading, setLoading] = useState(true);
 
 	const fetchUser = async () => {
 		try {
 			const response = await getUser();
-			if (response.data) {
-				setCurrentUser(response.data);
+
+			const user = response.data;
+			if (user) {
+				const roles = user?.roles || [];
+				const selectedRole = getSelectedRole(roles);
+
+				setCurrentUser(user);
+				setSelectedRole(selectedRole);
 			} else {
-				setCurrentUser(null);
+				throw new Error("User not found");
 			}
 		} catch {
 			setCurrentUser(null);
+			setSelectedRole(null);
 		}
 	};
 
 	const handleLogout = async () => {
 		await handleLogoutApiCall();
 		setCurrentUser(null);
+	};
+
+	const handleSelectRole = (
+		role,
+		availableRoles = currentUser?.roles || [],
+	) => {
+		if (availableRoles.includes(role)) {
+			setSelectedRole(role);
+			localStorage.setItem("selectedRole", role);
+		}
+	};
+
+	const getSelectedRole = (availableRoles = currentUser?.roles || []) => {
+		const selectedRole = localStorage.getItem("selectedRole");
+		if (availableRoles.includes(selectedRole)) {
+			return selectedRole;
+		}
+		return null;
 	};
 
 	useEffect(() => {
@@ -42,6 +69,8 @@ export const AuthProvider = ({ children }) => {
 		currentUser,
 		fetchUser,
 		logout: handleLogout,
+		selectedRole,
+		handleSelectRole,
 	};
 
 	return (

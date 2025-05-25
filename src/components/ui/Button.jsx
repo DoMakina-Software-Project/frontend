@@ -45,7 +45,7 @@ const LoadingSpinner = ({ loading }) =>
 	loading && (
 		<svg
 			aria-hidden="true"
-			role="status"
+			role=""
 			className="me-3 inline h-4 w-4 animate-spin text-gray-200"
 			viewBox="0 0 100 101"
 			fill="none"

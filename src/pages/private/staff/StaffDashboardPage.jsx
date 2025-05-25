@@ -15,10 +15,10 @@ import {
 	createPromotionPrice,
 	updatePromotionPrice,
 	getDashboardData,
-} from "../../../api/admin";
+} from "../../../api/staff";
 import { useApi } from "../../../hooks";
 
-export default function AdminDashboardPage() {
+export default function StaffDashboardPage() {
 	const { handleApiCall: getDashboardDataApiCall } = useApi(getDashboardData);
 	const { handleApiCall: getPromotionPriceApiCall } =
 		useApi(getPromotionPrice);

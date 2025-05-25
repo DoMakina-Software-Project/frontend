@@ -8,20 +8,14 @@ const AuthRoutes = () => {
 		return <Outlet />;
 	}
 
-	if (currentUser?.status === "INACTIVE") {
+	if (
+		currentUser?.status === "INACTIVE" ||
+		(currentUser?.roles?.includes("SELLER") && !currentUser?.sellerProfile)
+	) {
 		return <Navigate to="/onboarding" />;
 	}
 
-	if (currentUser?.roles?.includes("user")) {
-		return <Navigate to="/dashboard" />;
-	}
-
-	if (
-		currentUser?.roles?.includes("admin") ||
-		currentUser?.roles?.includes("superadmin")
-	) {
-		return <Navigate to="/admin" />;
-	}
+	return <Navigate to="/select-role" />;
 };
 
 export default AuthRoutes;

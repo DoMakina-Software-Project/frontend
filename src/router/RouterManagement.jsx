@@ -1,5 +1,12 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthRoutes, OnboardingRoutes, UserRoutes } from "./guards";
+import {
+	AuthRoutes,
+	OnboardingRoutes,
+	ClientRoutes,
+	SellerRoutes,
+	StaffRoutes,
+	SuperAdminRoutes,
+} from "./guards";
 import {
 	Error404Page,
 	HomePage,
@@ -17,17 +24,15 @@ import {
 	DashboardPage,
 	SellCarPage,
 	PromotionPage,
-} from "../pages/private/user";
+} from "../pages/private/seller";
 import {
-	AdminDashboardPage,
-	AdminBrandsPage,
-	AdminEditBrandPage,
-	AdminCreateBrandPage,
-} from "../pages/private/admin";
-import { CreateAdminPage } from "../pages/private/super-admin";
-import { VerifyEmailPage } from "../pages/onboarding";
-import AdminRoutes from "./guards/AdminRoutes";
-import SuperAdminRoutes from "./guards/SuperAdminRoutes";
+	StaffDashboardPage,
+	StaffBrandsPage,
+	StaffEditBrandPage,
+	StaffCreateBrandPage,
+} from "../pages/private/staff";
+import { OnboardingPage } from "../pages/onboarding";
+import { SelectRolePage } from "../pages/private";
 
 const RouterManagement = () => {
 	return (
@@ -39,6 +44,10 @@ const RouterManagement = () => {
 				<Route path="/car/:id" element={<CarPage />} />
 				<Route path="/wishlist" element={<WishlistPage />} />
 				<Route
+					path="/terms-and-conditions"
+					element={<TermsAndConditions />}
+				/>
+				<Route
 					path="/reset-password/:token"
 					element={<ResetPasswordPage />}
 				/>
@@ -46,11 +55,7 @@ const RouterManagement = () => {
 					path="/verify-email/:token"
 					element={<VerifyEmailTokenPage />}
 				/>
-				<Route path="/wishlist" element={<WishlistPage />} />
-				<Route
-					path="/terms-and-conditions"
-					element={<TermsAndConditions />}
-				/>
+
 				{/* Add the auth routes */}
 				<Route path="/" element={<AuthRoutes />}>
 					<Route path="login" element={<LoginPage />} />
@@ -61,37 +66,38 @@ const RouterManagement = () => {
 					/>
 				</Route>
 
+				<Route path="select-role" element={<SelectRolePage />} />
+
 				{/* Add the onboarding routes */}
 				<Route path="/onboarding" element={<OnboardingRoutes />}>
-					<Route index element={<VerifyEmailPage />} />
+					<Route index element={<OnboardingPage />} />
 				</Route>
 
+				<Route path="/client" element={<ClientRoutes />}></Route>
+
 				{/* Add the private routes */}
-				<Route path="/" element={<UserRoutes />}>
-					<Route path="dashboard" element={<DashboardPage />} />
+				<Route path="/seller" element={<SellerRoutes />}>
+					<Route index element={<DashboardPage />} />
 					<Route path="sell-car" element={<SellCarPage />} />
 					<Route path="promotion/:id" element={<PromotionPage />} />
 				</Route>
 
-				{/* Add the admin routes */}
-				<Route path="/admin" element={<AdminRoutes />}>
-					<Route index element={<AdminDashboardPage />} />
-					<Route path="create" element={<CreateAdminPage />} />
-					<Route path="brands" element={<AdminBrandsPage />} />
+				{/* Add the staff routes */}
+				<Route path="/staff" element={<StaffRoutes />}>
+					<Route index element={<StaffDashboardPage />} />
+					<Route path="brands" element={<StaffBrandsPage />} />
 					<Route
 						path="brands/create"
-						element={<AdminCreateBrandPage />}
+						element={<StaffCreateBrandPage />}
 					/>
 					<Route
 						path="brands/edit/:id"
-						element={<AdminEditBrandPage />}
+						element={<StaffEditBrandPage />}
 					/>
 				</Route>
 
 				{/* Add the super admin routes */}
-				{/* <Route path="/admin" element={<SuperAdminRoutes />}>
-					
-				</Route> */}
+				<Route path="/admin" element={<SuperAdminRoutes />}></Route>
 
 				{/* Add the 404 page */}
 				<Route path="*" element={<Error404Page />} />

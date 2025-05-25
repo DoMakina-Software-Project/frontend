@@ -7,39 +7,44 @@ import { useState } from "react";
 import { CiUser } from "react-icons/ci";
 
 const Header = () => {
-	const { currentUser, logout } = useAuth();
+	const { currentUser, logout, selectedRole } = useAuth();
 	const navigate = useNavigate();
 	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-	const userRoles = currentUser?.roles || [];
-
 	const menu = [
+		{
+			title: "Switch Role",
+			onClick: () => {
+				navigate("/select-role");
+			},
+			roles: ["CLIENT", "SELLER", "STAFF", "SUPERADMIN"],
+		},
 		{
 			title: "Dashboard",
 			link: "/dashboard",
-			roles: ["user"],
+			roles: ["SELLER"],
 		},
 		{
 			title: "Sell Car",
 			link: "/sell-car",
-			roles: ["user"],
+			roles: ["SELLER"],
 		},
 		{
-			title: "Admin Dashboard",
-			link: "/admin",
-			roles: ["admin", "superadmin"],
+			title: "Dashboard",
+			link: "/staff",
+			roles: ["STAFF", "SUPERADMIN"],
 		},
 		{
 			title: "Brands",
-			link: "/admin/brands",
-			roles: ["admin", "superadmin"],
+			link: "/staff/brands",
+			roles: ["STAFF", "SUPERADMIN"],
 		},
 		{
 			title: "Log out",
 			onClick: () => {
 				logout();
 			},
-			roles: ["user", "admin", "superadmin"],
+			roles: ["CLIENT", "SELLER", "STAFF", "SUPERADMIN"],
 		},
 	];
 
@@ -80,11 +85,7 @@ const Header = () => {
 						{isDropdownOpen && (
 							<div className="absolute right-0 z-40 mt-2 w-40 overflow-hidden rounded-md bg-white text-theme-text shadow-md">
 								{menu.map((item, index) => {
-									if (
-										item.roles.some((role) =>
-											userRoles.includes(role),
-										)
-									) {
+									if (item.roles.includes(selectedRole)) {
 										if (item.link) {
 											return (
 												<Link

@@ -1,20 +1,21 @@
 import { Outlet, Navigate } from "react-router-dom";
 import { useAuth } from "../../hooks";
 
-const SuperAdminRoutes = () => {
+const StaffRoutes = () => {
 	const { currentUser, selectedRole } = useAuth();
 
 	if (!currentUser) {
 		return <Navigate to="/login" />;
 	}
 
-	if (currentUser?.status === "INACTIVE") {
+	if (!currentUser?.status === "ACTIVE") {
 		return <Navigate to="/onboarding" />;
 	}
 
 	if (
-		currentUser?.roles?.includes("SUPERADMIN") &&
-		selectedRole === "SUPERADMIN"
+		(currentUser?.roles?.includes("STAFF") && selectedRole === "STAFF") ||
+		(currentUser?.roles?.includes("SUPERADMIN") &&
+			selectedRole === "SUPERADMIN")
 	) {
 		return <Outlet />;
 	}
@@ -22,4 +23,4 @@ const SuperAdminRoutes = () => {
 	return <Navigate to="/select-role" />;
 };
 
-export default SuperAdminRoutes;
+export default StaffRoutes;
