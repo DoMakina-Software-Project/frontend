@@ -21,12 +21,12 @@ const Header = () => {
 		},
 		{
 			title: "Dashboard",
-			link: "/dashboard",
+			link: "/seller",
 			roles: ["SELLER"],
 		},
 		{
 			title: "Sell Car",
-			link: "/sell-car",
+			link: "/seller/sell-car",
 			roles: ["SELLER"],
 		},
 		{
