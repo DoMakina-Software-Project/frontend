@@ -4,6 +4,7 @@ import { createBrand } from "../../../api/staff";
 import { useState, useEffect } from "react";
 import { useApi } from "../../../hooks";
 import { useNavigate } from "react-router-dom";
+import { clearErrors } from "../../../utils/form";
 
 const initialState = {
 	name: { value: "", error: "" },
@@ -42,16 +43,6 @@ const StaffCreateBrandPage = () => {
 		setPreview(null);
 	};
 
-	const clearErrors = () => {
-		setFormState((prev) => {
-			const newState = { ...prev };
-			Object.keys(newState).forEach((key) => {
-				newState[key].error = "";
-			});
-			return newState;
-		});
-	};
-
 	const handleImageUpload = (e) => {
 		const file = e.target.files[0];
 		if (!file) return;
@@ -76,7 +67,7 @@ const StaffCreateBrandPage = () => {
 	const handleCreateBrand = async (e) => {
 		e.preventDefault();
 		if (loadingCreateBrand) return;
-		clearErrors();
+		clearErrors(setFormState);
 
 		const { name, icon } = formState;
 

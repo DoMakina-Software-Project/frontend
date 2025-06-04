@@ -1,9 +1,10 @@
 import { MainLayout } from "../../components/layouts";
-import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { useApi } from "../../hooks";
+import { useApi, useAuth } from "../../hooks";
 import { createSellerProfile } from "../../api/seller";
 import { Button, Input } from "../../components/ui";
+import { clearErrors } from "../../utils/form";
+import { useNavigate } from "react-router-dom";
 
 const initialState = {
 	isBusiness: {
@@ -42,6 +43,8 @@ const initialState = {
 
 const SellerOnboardingPage = () => {
 	const navigate = useNavigate();
+	const { fetchUser } = useAuth();
+
 	const [formState, setFormState] = useState(initialState);
 
 	const { handleApiCall: createSellerProfileApiCall, loading } = useApi(
@@ -60,19 +63,15 @@ const SellerOnboardingPage = () => {
 		},
 	);
 
-	const clearErrors = () => {
-		setFormState((prev) => {
-			const newState = { ...prev };
-			Object.keys(newState).forEach((key) => {
-				newState[key].error = "";
-			});
-		});
-	};
-
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		if (loading) return;
-		clearErrors();
+		clearErrors(setFormState);
+
+		if (!formState) {
+			console.error("Form state is undefined");
+			return;
+		}
 
 		const {
 			isBusiness,
@@ -85,6 +84,17 @@ const SellerOnboardingPage = () => {
 			description,
 		} = formState;
 
+		if (
+			!isBusiness ||
+			!country ||
+			!city ||
+			!contactPhone ||
+			!contactEmail
+		) {
+			console.error("Required form fields are missing");
+			return;
+		}
+
 		let payload = {
 			isBusiness: isBusiness.value,
 			country: country.value,
@@ -92,7 +102,12 @@ const SellerOnboardingPage = () => {
 			contactPhone: contactPhone.value,
 			contactEmail: contactEmail.value,
 		};
-		if (isBusiness) {
+
+		if (isBusiness.value) {
+			if (!businessName || !businessAddress || !description) {
+				console.error("Required business fields are missing");
+				return;
+			}
 			payload = {
 				...payload,
 				businessName: businessName.value,
@@ -104,7 +119,8 @@ const SellerOnboardingPage = () => {
 		const data = await createSellerProfileApiCall(payload);
 
 		if (data) {
-			navigate("/");
+			await fetchUser();
+			navigate("/seller");
 		}
 	};
 

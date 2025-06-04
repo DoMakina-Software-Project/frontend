@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useApi, useAuth } from "../../hooks";
 import { login } from "../../api/auth";
+import { clearErrors } from "../../utils/form";
 
 const initialState = {
 	email: {
@@ -32,22 +33,11 @@ const LoginPage = () => {
 		},
 	});
 
-	const clearErrors = () => {
-		setFormState((prev) => {
-			const newState = { ...prev };
-			Object.keys(newState).forEach((key) => {
-				newState[key].error = "";
-			});
-
-			return newState;
-		});
-	};
-
 	const handleLogin = async (e) => {
 		e.preventDefault();
 		if (loading) return;
 
-		clearErrors();
+		clearErrors(setFormState);
 
 		const { email, password } = formState;
 

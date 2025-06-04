@@ -5,6 +5,7 @@ import { createCar } from "../../../api/seller";
 import { getAllBrands } from "../../../api/public";
 import { useApi } from "../../../hooks";
 import { useNavigate } from "react-router-dom";
+import { clearErrors } from "../../../utils/form";
 
 const initialState = {
 	brand: { value: "", error: "" },
@@ -42,17 +43,6 @@ const SellCarPage = () => {
 		setFormState(initialState);
 	};
 
-	const clearErrors = () => {
-		setFormState((prev) => {
-			const newState = { ...prev };
-			Object.keys(newState).forEach((key) => {
-				newState[key].error = "";
-			});
-
-			return newState;
-		});
-	};
-
 	const handleImageUpload = (e) => {
 		const files = Array.from(e.target.files);
 
@@ -66,7 +56,7 @@ const SellCarPage = () => {
 	const handleSellCar = async (e) => {
 		e.preventDefault();
 		if (loadingCreateCar || loadingBrands) return;
-		clearErrors();
+		clearErrors(setFormState);
 
 		const { brand, model, year, price, description, photos } = formState;
 

@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { Input, Button } from "../../components/ui";
 import { useApi } from "../../hooks";
 import { forgetPassword } from "../../api/auth";
+import { clearErrors } from "../../utils/form";
 
 const initialState = {
 	email: {
@@ -33,22 +34,11 @@ const ForgotPasswordPage = () => {
 		setFormState(initialState);
 	};
 
-	const clearErrors = () => {
-		setFormState((prev) => {
-			const newState = { ...prev };
-			Object.keys(newState).forEach((key) => {
-				newState[key].error = "";
-			});
-
-			return newState;
-		});
-	};
-
 	const submitHandler = async (e) => {
 		e.preventDefault();
 		if (loading) return;
 
-		clearErrors();
+		clearErrors(setFormState);
 
 		const { email } = formState;
 

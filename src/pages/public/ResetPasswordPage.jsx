@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import { useApi } from "../../hooks";
 import { resetPassword } from "../../api/auth";
 import { Button, Input } from "../../components/ui";
+import { clearErrors } from "../../utils/form";
 
 const INITIAL_STATE = {
 	password: {
@@ -39,21 +40,10 @@ const ResetPasswordPage = () => {
 		setFormState(INITIAL_STATE);
 	};
 
-	const clearErrors = () => {
-		setFormState((prev) => {
-			const newState = { ...prev };
-			Object.keys(newState).forEach((key) => {
-				newState[key].error = "";
-			});
-
-			return newState;
-		});
-	};
-
 	const submitHandler = async (e) => {
 		e.preventDefault();
 		if (loading) return;
-		clearErrors();
+		clearErrors(setFormState);
 
 		const { password, confirmPassword } = formState;
 

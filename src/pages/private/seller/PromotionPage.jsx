@@ -6,6 +6,7 @@ import { createPromotion } from "../../../api/seller";
 import { getPromotionPrice } from "../../../api/public";
 import { useNavigate, useParams } from "react-router-dom";
 import { MainLayout } from "../../../components/layouts";
+import { clearErrors } from "../../../utils/form";
 
 const initialState = {
 	promotionDays: {
@@ -83,23 +84,12 @@ const PromotionPage = () => {
 		return valid;
 	};
 
-	const clearErrors = () => {
-		setFormState((prev) => {
-			const newState = { ...prev };
-			Object.keys(newState).forEach((key) => {
-				newState[key].error = "";
-			});
-
-			return newState;
-		});
-	};
-
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 
 		if (loading) return;
 		if (!validateForm()) return;
-		clearErrors();
+		clearErrors(setFormState);
 		const newPromotion = {
 			promotionDays: parseInt(formState.promotionDays.value),
 			cardNumber: formState.cardNumber.value,

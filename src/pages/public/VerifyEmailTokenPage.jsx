@@ -60,7 +60,7 @@ const VerifyEmailTokenPage = () => {
 									onClick={() =>
 										error
 											? navigate("/")
-											: navigate("/dashboard")
+											: navigate("/onboarding")
 									}
 									className="text-theme-red hover:underline"
 								>

@@ -4,7 +4,7 @@ import { updateBrand, getBrand } from "../../../api/staff";
 import { useState, useEffect } from "react";
 import { useApi } from "../../../hooks";
 import { useNavigate, useParams } from "react-router-dom";
-
+import { clearErrors } from "../../../utils/form";
 const initialState = {
 	name: { value: "", error: "" },
 	icon: { value: null, error: "" }, // Supports file or URL
@@ -56,16 +56,6 @@ const StaffEditBrandPage = () => {
 		};
 	}, [preview]);
 
-	const clearErrors = () => {
-		setFormState((prev) => {
-			const newState = { ...prev };
-			Object.keys(newState).forEach((key) => {
-				newState[key].error = "";
-			});
-			return newState;
-		});
-	};
-
 	const handleImageUpload = (e) => {
 		const file = e.target.files[0];
 		if (!file) return;
@@ -88,7 +78,7 @@ const StaffEditBrandPage = () => {
 	const handleUpdateBrand = async (e) => {
 		e.preventDefault();
 		if (loadingUpdateBrand) return;
-		clearErrors();
+		clearErrors(setFormState);
 
 		const { name, icon } = formState;
 		const formData = new FormData();

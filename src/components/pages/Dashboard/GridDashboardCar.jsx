@@ -78,7 +78,7 @@ export default function GridDashboardCar() {
 				</h2>
 				<button
 					onClick={() => {
-						navigate("/sell-car");
+						navigate("sell-car");
 					}}
 					className="flex items-center gap-2 rounded bg-blue-100 px-4 py-2 font-semibold text-blue-700 duration-150 hover:bg-blue-500 hover:text-white"
 				>

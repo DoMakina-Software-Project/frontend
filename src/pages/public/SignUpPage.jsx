@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { Input, Button } from "../../components/ui";
 import { useApi, useAuth } from "../../hooks";
 import { register } from "../../api/auth";
+import { clearErrors } from "../../utils/form";
 
 const initialState = {
 	name: {
@@ -48,21 +49,10 @@ const SignUpPage = () => {
 		},
 	});
 
-	const clearErrors = () => {
-		setFormState((prev) => {
-			const newState = { ...prev };
-			Object.keys(newState).forEach((key) => {
-				newState[key].error = "";
-			});
-
-			return newState;
-		});
-	};
-
 	const handleSignUp = async (e) => {
 		e.preventDefault();
 		if (loading) return;
-		clearErrors();
+		clearErrors(setFormState);
 
 		const { name, surname, email, password, confirmPassword, acceptTerms } =
 			formState;
