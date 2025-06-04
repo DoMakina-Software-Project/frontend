@@ -25,8 +25,8 @@ const Header = () => {
 			roles: ["SELLER"],
 		},
 		{
-			title: "Sell Car",
-			link: "/seller/sell-car",
+			title: "List a Car",
+			link: "/seller/list-car",
 			roles: ["SELLER"],
 		},
 		{

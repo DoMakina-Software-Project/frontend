@@ -78,7 +78,7 @@ const RouterManagement = () => {
 				{/* Add the private routes */}
 				<Route path="/seller" element={<SellerRoutes />}>
 					<Route index element={<DashboardPage />} />
-					<Route path="sell-car" element={<SellCarPage />} />
+					<Route path="list-car" element={<SellCarPage />} />
 					<Route path="promotion/:id" element={<PromotionPage />} />
 				</Route>
 

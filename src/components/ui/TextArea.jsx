@@ -30,7 +30,7 @@ const TextArea = ({
 
 	return (
 		<div
-			className={`flex max-w-[300px] flex-col space-y-px ${wrapperClassName ? wrapperClassName : "w-full"}`}
+			className={`flex flex-col space-y-px ${wrapperClassName ? wrapperClassName : "w-full max-w-[300px]"}`}
 		>
 			<textarea
 				className={`${defaultClassName} ${className}`}
