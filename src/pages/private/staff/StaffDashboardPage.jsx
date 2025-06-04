@@ -20,8 +20,12 @@ import { useApi } from "../../../hooks";
 
 export default function StaffDashboardPage() {
 	const { handleApiCall: getDashboardDataApiCall } = useApi(getDashboardData);
-	const { handleApiCall: getPromotionPriceApiCall } =
-		useApi(getPromotionPrice);
+	const { handleApiCall: getPromotionPriceApiCall } = useApi(
+		getPromotionPrice,
+		{
+			ignoreErrors: true,
+		},
+	);
 	const { handleApiCall: createPromotionPriceApiCall } =
 		useApi(createPromotionPrice);
 	const { handleApiCall: updatePromotionPriceApiCall } =
@@ -95,15 +99,15 @@ export default function StaffDashboardPage() {
 						</h2>
 						<div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
 							<StatCard
-								title="Total Users"
-								value={dashboardData.numberOfUser}
+								title="Total Clients"
+								value={dashboardData.numberOfClients}
 								icon={
 									<FaUsers className="h-8 w-8 text-blue-500" />
 								}
 							/>
 							<StatCard
-								title="Total Admins"
-								value={dashboardData.numberOfAdmins}
+								title="Total Sellers"
+								value={dashboardData.numberOfSellers}
 								icon={
 									<FaUsers className="h-8 w-8 text-green-500" />
 								}
@@ -191,18 +195,18 @@ export default function StaffDashboardPage() {
 															brand.icon_url ||
 															"/placeholder.svg"
 														}
-														alt={brand.brand}
+														alt={brand.name}
 														className="mr-3 h-8 w-8 object-contain"
 													/>
 												) : (
 													<FaCarSide className="mr-3 h-8 w-8 text-gray-400" />
 												)}
 												<span className="text-lg font-medium">
-													{brand.brand}
+													{brand.name}
 												</span>
 											</div>
 											<span className="font-semibold text-blue-600">
-												{brand.totalCars} cars
+												{brand.carCount} cars
 											</span>
 										</li>
 									),

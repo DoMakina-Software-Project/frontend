@@ -10,6 +10,8 @@ const SelectInput = ({
 	className = "",
 	disabled = false,
 }) => {
+	const initialValue = value || formState?.[name]?.value;
+
 	const handleChange = (e) => {
 		const value = e.target.value;
 		setFormState((prev) => ({
@@ -23,13 +25,13 @@ const SelectInput = ({
 		<div className="flex flex-col space-y-1.5">
 			<select
 				className={`w-full rounded-lg border ${
-					formState[name].error
+					formState?.[name]?.error
 						? "border-red-500 focus:border-red-500"
 						: "border-gray-300 focus:border-blue-500"
 				} bg-white px-3 py-2 text-sm text-gray-900 focus:outline-none ${
 					disabled ? "cursor-not-allowed opacity-50" : ""
 				} ${className}`}
-				value={value}
+				value={initialValue}
 				onChange={handleChange}
 				required={required}
 				disabled={disabled}
@@ -45,8 +47,10 @@ const SelectInput = ({
 					</option>
 				))}
 			</select>
-			{formState[name].error && (
-				<p className="text-xs text-red-500">{formState[name].error}</p>
+			{formState?.[name]?.error && (
+				<p className="text-xs text-red-500">
+					{formState?.[name]?.error}
+				</p>
 			)}
 		</div>
 	);

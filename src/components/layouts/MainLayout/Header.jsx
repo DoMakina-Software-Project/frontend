@@ -40,6 +40,11 @@ const Header = () => {
 			roles: ["STAFF", "SUPERADMIN"],
 		},
 		{
+			title: "Staff",
+			link: "/admin/staff",
+			roles: ["SUPERADMIN"],
+		},
+		{
 			title: "Log out",
 			onClick: () => {
 				logout();
