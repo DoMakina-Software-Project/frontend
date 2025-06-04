@@ -1,35 +1,34 @@
 import { MainLayout } from "../../../components/layouts";
-import BrandTable from "../../../components/pages/Admin/BrandTable";
+import StaffTable from "../../../components/pages/Admin/StaffTable";
 import { useNavigate } from "react-router-dom";
-import { deleteBrand } from "../../../api/staff";
-import { getAllBrands } from "../../../api/public";
+import { deleteStaff, getAllStaff } from "../../../api/admin";
 import { useApi } from "../../../hooks";
 import { useEffect, useState } from "react";
 import { Button } from "../../../components/ui";
 
-const StaffBrandsPage = () => {
+const StaffPage = () => {
 	const navigate = useNavigate();
-	const { handleApiCall: getBrandsApiCall } = useApi(getAllBrands);
-	const { handleApiCall: deleteBrandApiCall } = useApi(deleteBrand);
+	const { handleApiCall: getStaffApiCall } = useApi(getAllStaff);
+	const { handleApiCall: deleteStaffApiCall } = useApi(deleteStaff);
 
-	const [brands, setBrands] = useState([]);
+	const [staff, setStaff] = useState([]);
 
 	const handleEdit = (id) => {
-		navigate(`/staff/brands/edit/${id}`);
+		navigate(`/admin/staff/edit/${id}`);
 	};
 
 	const handleDelete = (id) => {
-		deleteBrandApiCall({ id }).then((data) => {
+		deleteStaffApiCall({ id }).then((data) => {
 			if (data) {
-				setBrands((prev) => prev.filter((brand) => brand.id !== id));
+				setStaff((prev) => prev.filter((member) => member.id !== id));
 			}
 		});
 	};
 
 	useEffect(() => {
-		getBrandsApiCall().then((data) => {
+		getStaffApiCall().then((data) => {
 			if (data) {
-				setBrands(data);
+				setStaff(data);
 			}
 		});
 	}, []);
@@ -38,17 +37,17 @@ const StaffBrandsPage = () => {
 		<MainLayout mainOptions={{ paddingVertical: false }}>
 			<div className="container mx-auto min-h-[70vh] px-4 py-8">
 				<div className="mb-4 flex items-center justify-between">
-					<h1 className="text-2xl font-bold">Car Brands</h1>
+					<h1 className="text-2xl font-bold">Staff Members</h1>
 					<Button
 						extendClassName
 						className="h-9"
-						onClick={() => navigate("/staff/brands/create")}
+						onClick={() => navigate("/admin/staff/create")}
 					>
-						Create
+						Create Staff
 					</Button>
 				</div>
-				<BrandTable
-					brands={brands}
+				<StaffTable
+					staff={staff}
 					onEdit={handleEdit}
 					onDelete={handleDelete}
 				/>
@@ -57,4 +56,4 @@ const StaffBrandsPage = () => {
 	);
 };
 
-export default StaffBrandsPage;
+export default StaffPage;

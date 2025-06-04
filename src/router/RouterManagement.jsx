@@ -33,6 +33,11 @@ import {
 } from "../pages/private/staff";
 import { OnboardingPage } from "../pages/onboarding";
 import { SelectRolePage } from "../pages/private";
+import {
+	CreateStaffPage,
+	StaffPage,
+	EditStaffPage,
+} from "../pages/private/admin";
 
 const RouterManagement = () => {
 	return (
@@ -97,7 +102,14 @@ const RouterManagement = () => {
 				</Route>
 
 				{/* Add the super admin routes */}
-				<Route path="/admin" element={<SuperAdminRoutes />}></Route>
+				<Route path="/admin" element={<SuperAdminRoutes />}>
+					<Route index element={<StaffDashboardPage />} />
+					<Route path="staff">
+						<Route index element={<StaffPage />} />
+						<Route path="create" element={<CreateStaffPage />} />
+						<Route path="edit/:id" element={<EditStaffPage />} />
+					</Route>
+				</Route>
 
 				{/* Add the 404 page */}
 				<Route path="*" element={<Error404Page />} />

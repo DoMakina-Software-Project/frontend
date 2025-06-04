@@ -91,7 +91,7 @@ const StaffEditBrandPage = () => {
 
 		const response = await updateBrandApiCall({ id, formData });
 		if (response) {
-			navigate("/admin/brands");
+			navigate("/staff/brands");
 		}
 	};
 

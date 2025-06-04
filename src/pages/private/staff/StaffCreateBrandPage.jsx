@@ -81,7 +81,7 @@ const StaffCreateBrandPage = () => {
 		const response = await createBrandApiCall(formData);
 		if (response) {
 			resetForm();
-			navigate("/admin/brands");
+			navigate("/staff/brands");
 		}
 	};
 
