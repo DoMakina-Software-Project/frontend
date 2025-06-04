@@ -1,11 +1,17 @@
 import { MainLayout } from "../../../components/layouts";
-import { Button, Input, TextArea } from "../../../components/ui";
 import { useEffect, useState } from "react";
 import { createCar } from "../../../api/seller";
 import { getAllBrands } from "../../../api/public";
 import { useApi } from "../../../hooks";
 import { useNavigate } from "react-router-dom";
 import { clearErrors } from "../../../utils/form";
+import {
+	StepIndicator,
+	BasicInfo,
+	CarDetails,
+	PhotoUpload,
+	NavigationButtons,
+} from "../../../components/pages/SellCar";
 
 const initialState = {
 	brand: { value: "", error: "" },
@@ -14,6 +20,10 @@ const initialState = {
 	price: { value: "", error: "" },
 	description: { value: "", error: "" },
 	photos: { value: [], error: "" },
+	listingType: { value: "SALE", error: "" },
+	fuelType: { value: "PETROL", error: "" },
+	transmission: { value: "MANUAL", error: "" },
+	mileage: { value: "", error: "" },
 };
 
 const SellCarPage = () => {
@@ -38,19 +48,74 @@ const SellCarPage = () => {
 
 	const [formState, setFormState] = useState(initialState);
 	const [brands, setBrands] = useState([]);
+	const [activeStep, setActiveStep] = useState(1);
+	const totalSteps = 3;
 
 	const resetForm = () => {
 		setFormState(initialState);
+		setActiveStep(1);
 	};
 
-	const handleImageUpload = (e) => {
-		const files = Array.from(e.target.files);
+	const validateBasicInfo = () => {
+		const { brand, model, year, price } = formState;
+		let isValid = true;
+		const newState = { ...formState };
 
-		// Update state with actual file objects (for FormData)
-		setFormState((prev) => ({
-			...prev,
-			photos: { value: [...prev.photos.value, ...files], error: "" },
-		}));
+		if (!brand.value) {
+			newState.brand.error = "Brand is required";
+			isValid = false;
+		}
+		if (!model.value) {
+			newState.model.error = "Model is required";
+			isValid = false;
+		}
+		if (!year.value) {
+			newState.year.error = "Year is required";
+			isValid = false;
+		}
+		if (!price.value) {
+			newState.price.error = "Price is required";
+			isValid = false;
+		}
+
+		setFormState(newState);
+		return isValid;
+	};
+
+	const validateCarDetails = () => {
+		const { description, mileage } = formState;
+		let isValid = true;
+		const newState = { ...formState };
+
+		if (!description.value) {
+			newState.description.error = "Description is required";
+			isValid = false;
+		} else if (description.value.length < 10) {
+			newState.description.error =
+				"Description must be at least 10 characters";
+			isValid = false;
+		}
+		if (!mileage.value) {
+			newState.mileage.error = "Mileage is required";
+			isValid = false;
+		}
+
+		setFormState(newState);
+		return isValid;
+	};
+
+	const validatePhotos = () => {
+		const { photos } = formState;
+		let isValid = true;
+		const newState = { ...formState };
+
+		if (photos.value.length === 0) {
+			newState.photos.error = "At least one photo is required";
+			isValid = false;
+		}
+
+		setFormState(newState);
+		return isValid;
 	};
 
 	const handleSellCar = async (e) => {
@@ -58,15 +123,29 @@ const SellCarPage = () => {
 		if (loadingCreateCar || loadingBrands) return;
 		clearErrors(setFormState);
 
-		const { brand, model, year, price, description, photos } = formState;
+		const {
+			brand,
+			model,
+			year,
+			price,
+			description,
+			photos,
+			listingType,
+			fuelType,
+			transmission,
+			mileage,
+		} = formState;
 
 		const formData = new FormData();
-
 		formData.append("brandId", brand.value);
 		formData.append("model", model.value);
 		formData.append("year", year.value);
 		formData.append("price", price.value);
 		formData.append("description", description.value);
+		formData.append("listingType", listingType.value);
+		formData.append("fuelType", fuelType.value);
+		formData.append("transmission", transmission.value);
+		formData.append("mileage", mileage.value);
 		photos.value.forEach((photo) => {
 			formData.append("images", photo);
 		});
@@ -74,8 +153,36 @@ const SellCarPage = () => {
 		const response = await createCarApiCall(formData);
 		if (response) {
 			resetForm();
-			navigate("/dashboard");
+			navigate("/seller");
 		}
+	};
+
+	const handleNext = (e) => {
+		e.preventDefault();
+		let canProceed = false;
+
+		switch (activeStep) {
+			case 1:
+				canProceed = validateBasicInfo();
+				break;
+			case 2:
+				canProceed = validateCarDetails();
+				break;
+			case 3:
+				canProceed = validatePhotos();
+				break;
+			default:
+				canProceed = false;
+		}
+
+		if (canProceed) {
+			setActiveStep(activeStep + 1);
+		}
+	};
+
+	const handlePrevious = (e) => {
+		e.preventDefault();
+		setActiveStep(activeStep - 1);
 	};
 
 	useEffect(() => {
@@ -85,114 +192,52 @@ const SellCarPage = () => {
 	}, []);
 
 	return (
-		<MainLayout>
-			<div className="flex flex-grow items-center justify-center">
-				<div className="flex w-full max-w-xl flex-col items-center justify-center rounded-2xl bg-white px-6 py-16 shadow-sm">
-					<form
-						onSubmit={handleSellCar}
-						className="flex w-full max-w-[300px] flex-col items-center justify-center space-y-10"
-					>
-						<div className="flex flex-col items-center justify-center space-y-1">
-							<h1 className="text-[26px]">Sell your Car</h1>
-							<p className="text-[13px] text-theme-light-gray">
-								Please provide the details of your car.
-							</p>
-						</div>
-						<div className="flex w-full flex-col space-y-1.5">
-							<select
-								className="w-full rounded bg-theme-input px-3 py-2 text-[13px] text-theme-text placeholder-theme-light-gray"
-								value={formState.brand.value}
-								onChange={(e) =>
-									setFormState((prev) => ({
-										...prev,
-										brand: {
-											value: e.target.value,
-											error: "",
-										},
-									}))
-								}
-								required
-							>
-								<option value="" disabled>
-									Select Brand
-								</option>
-								{brands.map((brand) => (
-									<option key={brand.id} value={brand.id}>
-										{brand.name}
-									</option>
-								))}
-							</select>
-							<Input
-								type="text"
-								placeholder="Model"
-								name="model"
+		<MainLayout mainOptions={{ centerHorizontal: true }}>
+			<div className="flex flex-col items-center justify-center bg-gray-50 py-12">
+				<div className="w-full max-w-4xl rounded-2xl bg-white p-8 shadow-lg">
+					<div className="mb-8 text-center">
+						<h1 className="text-3xl font-bold text-gray-900">
+							List a Car
+						</h1>
+						<p className="mt-2 text-sm text-gray-600">
+							Please provide the details of your car to create a
+							listing.
+						</p>
+					</div>
+
+					<StepIndicator
+						activeStep={activeStep}
+						totalSteps={totalSteps}
+					/>
+
+					<form onSubmit={handleSellCar} className="space-y-8">
+						{activeStep === 1 && (
+							<BasicInfo
 								formState={formState}
 								setFormState={setFormState}
-								required
-								minLength={2}
-								maxLength={50}
+								brands={brands}
 							/>
-							<Input
-								type="number"
-								placeholder="Year"
-								name="year"
+						)}
+						{activeStep === 2 && (
+							<CarDetails
 								formState={formState}
 								setFormState={setFormState}
-								required
-								min={1885}
-								max={new Date().getFullYear()}
 							/>
-							<Input
-								type="number"
-								placeholder="Price (USD)"
-								name="price"
+						)}
+						{activeStep === 3 && (
+							<PhotoUpload
 								formState={formState}
 								setFormState={setFormState}
-								required
-								min={0}
-								max={1000000000}
 							/>
-							<TextArea
-								placeholder="Description"
-								name="description"
-								formState={formState}
-								setFormState={setFormState}
-								required
-								minLength={10}
-								maxLength={500}
-							/>
-							<div className="flex flex-col space-y-2">
-								<label className="text-sm text-theme-text">
-									Upload Photos
-								</label>
-								<input
-									type="file"
-									accept="image/*"
-									multiple
-									onChange={handleImageUpload}
-									className="w-full text-sm text-theme-text file:mr-4 file:rounded-full file:border-0 file:bg-blue-300 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-blue-500"
-								/>
-								{formState.photos.value.length > 0 && (
-									<div className="mt-2 flex flex-wrap gap-2">
-										{formState.photos.value.map(
-											(photo, index) => (
-												<img
-													key={index}
-													src={URL.createObjectURL(
-														photo,
-													)} // Create URL from File object
-													alt={`Uploaded car photo ${index + 1}`}
-													className="h-20 w-20 rounded object-cover"
-												/>
-											),
-										)}
-									</div>
-								)}
-							</div>
-						</div>
-						<Button type="submit" className="w-full">
-							Create Post
-						</Button>
+						)}
+
+						<NavigationButtons
+							activeStep={activeStep}
+							totalSteps={totalSteps}
+							onPrevious={handlePrevious}
+							onNext={handleNext}
+							loading={loadingCreateCar}
+						/>
 					</form>
 				</div>
 			</div>

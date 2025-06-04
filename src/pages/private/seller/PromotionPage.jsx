@@ -101,7 +101,7 @@ const PromotionPage = () => {
 		const data = await handleApiCall(newPromotion);
 		if (data) {
 			resetForm();
-			navigate("/dashboard");
+			navigate("/seller");
 		}
 	};
 
