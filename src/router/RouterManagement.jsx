@@ -25,7 +25,9 @@ import {
 	SellCarPage,
 	PromotionPage,
 	RentalAvailabilityPage,
+	BookingManagementPage,
 } from "../pages/private/seller";
+import { ClientDashboardPage, MyBookingsPage } from "../pages/private/client";
 import {
 	StaffDashboardPage,
 	StaffBrandsPage,
@@ -79,7 +81,10 @@ const RouterManagement = () => {
 					<Route index element={<OnboardingPage />} />
 				</Route>
 
-				<Route path="/client" element={<ClientRoutes />}></Route>
+				<Route path="/client" element={<ClientRoutes />}>
+					<Route index element={<ClientDashboardPage />} />
+					<Route path="bookings" element={<MyBookingsPage />} />
+				</Route>
 
 				{/* Add the private routes */}
 				<Route path="/seller" element={<SellerRoutes />}>
@@ -89,6 +94,10 @@ const RouterManagement = () => {
 					<Route
 						path="rental-availability/:carId?"
 						element={<RentalAvailabilityPage />}
+					/>
+					<Route
+						path="bookings"
+						element={<BookingManagementPage />}
 					/>
 				</Route>
 

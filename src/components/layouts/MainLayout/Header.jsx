@@ -30,8 +30,13 @@ const Header = () => {
 			roles: ["SELLER"],
 		},
 		{
-			title: "Rental Availability",
+			title: "Rental",
 			link: "/seller/rental-availability",
+			roles: ["SELLER"],
+		},
+		{
+			title: "Bookings",
+			link: "/seller/bookings",
 			roles: ["SELLER"],
 		},
 		{

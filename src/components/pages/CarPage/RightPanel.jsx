@@ -1,3 +1,5 @@
+import { BookingWidget } from "../../ui";
+
 function RightPanel(props) {
 	return (
 		<div className="rounded-lg bg-gray-50 p-4 md:col-span-3">
@@ -14,6 +16,13 @@ function RightPanel(props) {
 					Model Year: {props.carDetails.year}
 				</p>
 			</div>
+
+			{/* Booking Widget for rental cars */}
+			{props.carDetails.listingType === "RENT" && (
+				<div className="mb-6">
+					<BookingWidget car={props.carDetails} />
+				</div>
+			)}
 
 			{/* <div className="mb-6 space-y-4">
 				<h3 className="text-xl font-bold">Contact owner</h3>
