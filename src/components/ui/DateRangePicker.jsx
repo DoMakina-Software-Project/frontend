@@ -40,16 +40,30 @@ const DateRangePicker = ({ onAddRange, onRemoveRange, disabled = false }) => {
 
 	const validateAndRemoveRange = () => {
 		setError("");
-		const validation = validateDateRange(startDate, endDate, false);
 
-		if (!validation.isValid) {
-			setError(validation.error);
+		if (!startDate || !endDate) {
+			setError("Both start and end dates are required");
+			return;
+		}
+
+		const start = new Date(startDate);
+		const end = new Date(endDate);
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+
+		if (start < today) {
+			setError("Start date cannot be in the past");
+			return;
+		}
+
+		if (start > end) {
+			setError("Start date must be before or equal to end date");
 			return;
 		}
 
 		onRemoveRange({
-			startDate: new Date(startDate).toISOString().split("T")[0],
-			endDate: new Date(endDate).toISOString().split("T")[0],
+			startDate: start.toISOString().split("T")[0],
+			endDate: end.toISOString().split("T")[0],
 		});
 
 		setStartDate("");
