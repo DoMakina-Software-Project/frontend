@@ -66,6 +66,10 @@ export default function GridDashboardCar() {
 		}
 	};
 
+	const handleManageAvailability = (carId) => {
+		navigate(`/seller/rental-availability/${carId}`);
+	};
+
 	useEffect(() => {
 		getCarsApiCalls().then((data) => setCars(data));
 	}, []);
@@ -106,6 +110,9 @@ export default function GridDashboardCar() {
 							onImageClick={() => {
 								navigate(`/car/${car.id}`);
 							}}
+							onManageAvailability={() =>
+								handleManageAvailability(car.id)
+							}
 						/>
 					))}
 				</div>
