@@ -5,6 +5,7 @@ import {
 	MdOutlineSell,
 	MdSell,
 	MdStarOutline,
+	MdCalendarToday,
 } from "react-icons/md";
 import CarExampleImage from "../../../assets/images/car-example.png";
 
@@ -14,6 +15,7 @@ const CarCard = ({
 	onPromote,
 	updateIsSold,
 	onImageClick = () => {},
+	onManageAvailability,
 }) => {
 	return (
 		<div className="overflow-hidden rounded-xl bg-white shadow-md">
@@ -32,6 +34,23 @@ const CarCard = ({
 					</div>
 					<div className="absolute right-0 w-48 scale-0 transition-all duration-200 group-hover:scale-100">
 						<div className="mt-2 rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5">
+							{/* Manage Availability button for rental cars */}
+							{car?.listingType === "RENT" && (
+								<button
+									onClick={() =>
+										onManageAvailability &&
+										onManageAvailability()
+									}
+									className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+								>
+									<MdCalendarToday
+										className="mr-3 w-5"
+										size={20}
+									/>
+									Manage Availability
+								</button>
+							)}
+
 							<button
 								onClick={() => {
 									onDelete();
@@ -86,6 +105,9 @@ const CarCard = ({
 					<h3 className="font-medium">{`${car?.brand} ${car?.model}`}</h3>
 					<span className="font-semibold">
 						{car?.price?.toLocaleString()}$
+						{car?.listingType === "RENT" && (
+							<span className="text-sm text-gray-500">/day</span>
+						)}
 					</span>
 				</div>
 				<div className="flex gap-2">
@@ -97,6 +119,16 @@ const CarCard = ({
 					{car?.isSold && (
 						<span className="rounded bg-red-100 px-2 py-1 text-xs text-red-600">
 							Sold
+						</span>
+					)}
+					{car?.listingType === "RENT" && (
+						<span className="rounded bg-green-100 px-2 py-1 text-xs text-green-600">
+							For Rent
+						</span>
+					)}
+					{car?.listingType === "SALE" && (
+						<span className="rounded bg-yellow-100 px-2 py-1 text-xs text-yellow-600">
+							For Sale
 						</span>
 					)}
 				</div>

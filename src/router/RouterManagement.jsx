@@ -24,6 +24,7 @@ import {
 	DashboardPage,
 	SellCarPage,
 	PromotionPage,
+	RentalAvailabilityPage,
 } from "../pages/private/seller";
 import {
 	StaffDashboardPage,
@@ -85,6 +86,14 @@ const RouterManagement = () => {
 					<Route index element={<DashboardPage />} />
 					<Route path="list-car" element={<SellCarPage />} />
 					<Route path="promotion/:id" element={<PromotionPage />} />
+					<Route
+						path="rental-availability"
+						element={<RentalAvailabilityPage />}
+					/>
+					<Route
+						path="rental-availability/:carId"
+						element={<RentalAvailabilityPage />}
+					/>
 				</Route>
 
 				{/* Add the staff routes */}

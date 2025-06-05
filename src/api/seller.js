@@ -55,3 +55,39 @@ export const createPromotion = ({
 		expiryDate,
 		cvv,
 	});
+
+/**
+ * Rental Availability Management API Functions
+ */
+
+/**
+ * Add availability periods for a rental car
+ * @param {number} carId - The car ID
+ * @param {Array} periods - Array of date ranges {startDate, endDate}
+ * @returns {Promise<any>} The response data
+ */
+export const addRentalAvailability = ({ carId, periods }) =>
+	axios.post("/seller/rental-availability/add", { carId, periods });
+
+/**
+ * Remove availability periods for a rental car
+ * @param {number} carId - The car ID
+ * @param {Array} periods - Array of date ranges {startDate, endDate}
+ * @returns {Promise<any>} The response data
+ */
+export const removeRentalAvailability = ({ carId, periods }) =>
+	axios.post("/seller/rental-availability/remove", { carId, periods });
+
+/**
+ * Get available dates for a rental car within a specific range
+ * @param {number} carId - The car ID
+ * @param {string} startDate - Start date (ISO string)
+ * @param {string} endDate - End date (ISO string)
+ * @returns {Promise<any>} The available date ranges
+ */
+export const getAvailableDatesInRange = ({ carId, startDate, endDate }) =>
+	axios.post("/seller/rental-availability/available-dates", {
+		carId,
+		startDate,
+		endDate,
+	});
