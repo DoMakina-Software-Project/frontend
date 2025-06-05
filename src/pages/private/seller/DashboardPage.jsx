@@ -11,7 +11,7 @@ const DashboardPage = () => {
 
 	return (
 		<MainLayout mainOptions={{ paddingVertical: false }}>
-			<div className="lg:px14 flex w-full flex-col items-center justify-start gap-8 px-6 py-8">
+			<div className="lg:px-14 flex w-full flex-col items-center justify-start gap-8 px-6 py-8">
 				<div className="flex w-full max-w-7xl flex-col items-start justify-start gap-6">
 					<div className="flex flex-row items-center justify-center gap-4">
 						<FaCircleUser />
