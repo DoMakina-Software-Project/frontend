@@ -87,11 +87,7 @@ const RouterManagement = () => {
 					<Route path="list-car" element={<SellCarPage />} />
 					<Route path="promotion/:id" element={<PromotionPage />} />
 					<Route
-						path="rental-availability"
-						element={<RentalAvailabilityPage />}
-					/>
-					<Route
-						path="rental-availability/:carId"
+						path="rental-availability/:carId?"
 						element={<RentalAvailabilityPage />}
 					/>
 				</Route>
