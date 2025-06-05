@@ -1,9 +1,10 @@
 import { GiSteeringWheel } from "react-icons/gi";
 import { useNavigate } from "react-router-dom";
 
-export default function CarDetailsCard({ data, length }) {
+export default function CarDetailsCard({ data }) {
 	const navigate = useNavigate();
-	if (length === 0) return null;
+	if (!data) return null;
+
 	return (
 		<div className="max-w-xs rounded-lg bg-gray-800 p-4 transition-all duration-150 hover:scale-[1.02]">
 			<div className="mb-4 flex items-start justify-between">
