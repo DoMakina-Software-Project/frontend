@@ -95,10 +95,6 @@ const RentalAvailabilityPage = () => {
 			// Filter only rental cars
 			const rentalCars = data.filter((car) => car.listingType === "RENT");
 			setCars(rentalCars);
-
-			if (rentalCars.length === 0) {
-				toast.info("You don't have any cars listed for rent yet.");
-			}
 		}
 	};
 
@@ -163,17 +159,14 @@ const RentalAvailabilityPage = () => {
 					<div className="h-8 w-8 animate-spin rounded-full border-4 border-theme-blue border-t-transparent"></div>
 				</div>
 			) : cars.length === 0 ? (
-				<div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
+				<div className="flex flex-col items-center justify-center rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
 					<FaCar className="mx-auto mb-3 text-4xl text-gray-400" />
-					<p className="mb-4 text-gray-600">No rental cars found</p>
-					<p className="text-sm text-gray-500">
+					<p className="text-gray-600">No rental cars found</p>
+					<p className="mb-6 text-sm text-gray-500">
 						You need to have cars listed for rent to manage
 						availability.
 					</p>
-					<Button
-						className="mt-4"
-						onClick={() => navigate("/seller/list-car")}
-					>
+					<Button onClick={() => navigate("/seller/list-car")}>
 						List a Car for Rent
 					</Button>
 				</div>
