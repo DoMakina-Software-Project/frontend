@@ -156,9 +156,9 @@ const AvailabilityPeriodsList = ({
 			<h3 className="font-semibold text-gray-800">
 				Current Availability Periods
 			</h3>
-			{periods.map((period, index) => (
+			{periods.map((period) => (
 				<div
-					key={index}
+					key={`${period.startDate}-${period.endDate}`}
 					className="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-4"
 				>
 					<div className="flex items-center gap-3">
