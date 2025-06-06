@@ -22,7 +22,6 @@ import {
 	FaChartBar,
 	FaMoneyBillWave,
 } from "react-icons/fa";
-import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
 const statusColors = {
@@ -54,55 +53,23 @@ const BookingManagementPage = () => {
 		useApi(getSellerBookings);
 	const { handleApiCall: confirmBookingApiCall, loading: loadingConfirm } =
 		useApi(confirmBooking, {
-			onSuccess: () => {
-				toast.success("Booking confirmed successfully!");
-				fetchBookings();
-			},
-			onError: (error) => {
-				toast.error(
-					error?.response?.data?.message ||
-						"Failed to confirm booking",
-				);
-			},
+			disableSuccessToast: false,
+			successMessage: "Booking confirmed successfully!",
 		});
 	const { handleApiCall: rejectBookingApiCall, loading: loadingReject } =
 		useApi(rejectBooking, {
-			onSuccess: () => {
-				toast.success("Booking rejected successfully!");
-				fetchBookings();
-			},
-			onError: (error) => {
-				toast.error(
-					error?.response?.data?.message ||
-						"Failed to reject booking",
-				);
-			},
+			disableSuccessToast: false,
+			successMessage: "Booking rejected successfully!",
 		});
 	const { handleApiCall: cancelBookingApiCall, loading: loadingCancel } =
 		useApi(sellerCancelBooking, {
-			onSuccess: () => {
-				toast.success("Booking cancelled successfully!");
-				fetchBookings();
-			},
-			onError: (error) => {
-				toast.error(
-					error?.response?.data?.message ||
-						"Failed to cancel booking",
-				);
-			},
+			disableSuccessToast: false,
+			successMessage: "Booking cancelled successfully!",
 		});
 	const { handleApiCall: completeBookingApiCall, loading: loadingComplete } =
 		useApi(sellerCompleteBooking, {
-			onSuccess: () => {
-				toast.success("Booking completed successfully!");
-				fetchBookings();
-			},
-			onError: (error) => {
-				toast.error(
-					error?.response?.data?.message ||
-						"Failed to complete booking",
-				);
-			},
+			disableSuccessToast: false,
+			successMessage: "Booking completed successfully!",
 		});
 	const { handleApiCall: getStatsApiCall, loading: loadingStats } = useApi(
 		getSellerBookingStats,
@@ -128,19 +95,31 @@ const BookingManagementPage = () => {
 	};
 
 	const handleConfirmBooking = async (bookingId) => {
-		await confirmBookingApiCall(bookingId);
+		const data = await confirmBookingApiCall(bookingId);
+		if (data) {
+			fetchBookings();
+		}
 	};
 
 	const handleRejectBooking = async (bookingId) => {
-		await rejectBookingApiCall(bookingId);
+		const data = await rejectBookingApiCall(bookingId);
+		if (data) {
+			fetchBookings();
+		}
 	};
 
 	const handleCancelBooking = async (bookingId) => {
-		await cancelBookingApiCall(bookingId);
+		const data = await cancelBookingApiCall(bookingId);
+		if (data) {
+			fetchBookings();
+		}
 	};
 
 	const handleCompleteBooking = async (bookingId) => {
-		await completeBookingApiCall(bookingId);
+		const data = await completeBookingApiCall(bookingId);
+		if (data) {
+			fetchBookings();
+		}
 	};
 
 	const formatDate = (dateString) => {

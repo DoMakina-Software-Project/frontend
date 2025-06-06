@@ -21,7 +21,6 @@ import {
 	FaUser,
 	FaEnvelope,
 } from "react-icons/fa";
-import toast from "react-hot-toast";
 
 const MyBookingsPage = () => {
 	const navigate = useNavigate();
@@ -36,51 +35,20 @@ const MyBookingsPage = () => {
 
 	// API hooks
 	const { handleApiCall: getBookingsApiCall, loading: loadingBookings } =
-		useApi(getClientBookings, {
-			onSuccess: (data) => {
-				setBookings(data);
-				filterBookings(data, statusFilter);
-			},
-			onError: () => {
-				toast.error("Failed to load bookings");
-			},
-		});
+		useApi(getClientBookings);
 
-	const { handleApiCall: getBookingApiCall } = useApi(getBookingById, {
-		onSuccess: (data) => {
-			setSelectedBooking(data);
-			setShowBookingModal(true);
-		},
-		onError: () => {
-			toast.error("Failed to load booking details");
-		},
-	});
+	const { handleApiCall: getBookingApiCall } = useApi(getBookingById);
 
 	const { handleApiCall: cancelBookingApiCall, loading: loadingCancel } =
 		useApi(cancelBooking, {
-			onSuccess: () => {
-				toast.success("Booking cancelled successfully");
-				setShowBookingModal(false);
-				fetchBookings();
-			},
-			onError: (error) => {
-				toast.error(
-					error?.response?.data?.message ||
-						"Failed to cancel booking",
-				);
-			},
+			disableSuccessToast: false,
+			successMessage: "Booking cancelled successfully",
 		});
 
 	const { handleApiCall: completeBookingApiCall, loading: loadingComplete } =
 		useApi(completeBooking, {
-			onSuccess: () => {
-				toast.success("Booking marked as completed");
-				setShowBookingModal(false);
-				fetchBookings();
-			},
-			onError: () => {
-				toast.error("Failed to complete booking");
-			},
+			disableSuccessToast: false,
+			successMessage: "Booking marked as completed",
 		});
 
 	useEffect(() => {
@@ -92,7 +60,11 @@ const MyBookingsPage = () => {
 	}, [statusFilter, bookings]);
 
 	const fetchBookings = async () => {
-		await getBookingsApiCall();
+		const data = await getBookingsApiCall();
+		if (data) {
+			setBookings(data);
+			filterBookings(data, statusFilter);
+		}
 	};
 
 	const filterBookings = (allBookings, filter) => {
@@ -144,18 +116,30 @@ const MyBookingsPage = () => {
 	};
 
 	const handleViewBooking = async (bookingId) => {
-		await getBookingApiCall(bookingId);
+		const data = await getBookingApiCall(bookingId);
+		if (data) {
+			setSelectedBooking(data);
+			setShowBookingModal(true);
+		}
 	};
 
 	const handleCancelBooking = async () => {
 		if (selectedBooking) {
-			await cancelBookingApiCall(selectedBooking.id);
+			const data = await cancelBookingApiCall(selectedBooking.id);
+			if (data) {
+				setShowBookingModal(false);
+				fetchBookings();
+			}
 		}
 	};
 
 	const handleCompleteBooking = async () => {
 		if (selectedBooking) {
-			await completeBookingApiCall(selectedBooking.id);
+			const data = await completeBookingApiCall(selectedBooking.id);
+			if (data) {
+				setShowBookingModal(false);
+				fetchBookings();
+			}
 		}
 	};
 
@@ -323,10 +307,10 @@ const MyBookingsPage = () => {
 							Car Information
 						</h3>
 						<div className="flex items-center gap-4">
-							{selectedBooking.Car.images &&
-							selectedBooking.Car.images.length > 0 ? (
+							{selectedBooking.Car.CarImages &&
+							selectedBooking.Car.CarImages.length > 0 ? (
 								<img
-									src={selectedBooking.Car.images[0]}
+									src={selectedBooking.Car.CarImages[0].url}
 									alt={`${selectedBooking.Car.Brand?.name} ${selectedBooking.Car.model}`}
 									className="h-20 w-20 rounded-lg object-cover"
 								/>

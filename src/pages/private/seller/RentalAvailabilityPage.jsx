@@ -35,29 +35,13 @@ const RentalAvailabilityPage = () => {
 		useApi(getCars);
 	const { handleApiCall: addAvailabilityApiCall, loading: loadingAdd } =
 		useApi(addRentalAvailability, {
-			onSuccess: () => {
-				toast.success("Availability period added successfully!");
-				fetchAvailability();
-			},
-			onError: (error) => {
-				toast.error(
-					error?.response?.data?.message ||
-						"Failed to add availability period",
-				);
-			},
+			disableSuccessToast: false,
+			successMessage: "Availability period added successfully!",
 		});
 	const { handleApiCall: removeAvailabilityApiCall, loading: loadingRemove } =
 		useApi(removeRentalAvailability, {
-			onSuccess: () => {
-				toast.success("Availability period removed successfully!");
-				fetchAvailability();
-			},
-			onError: (error) => {
-				toast.error(
-					error?.response?.data?.message ||
-						"Failed to remove availability period",
-				);
-			},
+			disableSuccessToast: false,
+			successMessage: "Availability period removed successfully!",
 		});
 	const {
 		handleApiCall: getAvailabilityApiCall,
@@ -125,23 +109,27 @@ const RentalAvailabilityPage = () => {
 	const handleAddAvailability = async (dateRange) => {
 		if (!selectedCar) return;
 
-		await addAvailabilityApiCall({
+		const data = await addAvailabilityApiCall({
 			carId: selectedCar.id,
 			periods: [dateRange],
 		});
 
-		await fetchAvailability();
+		if (data) {
+			await fetchAvailability();
+		}
 	};
 
 	const handleRemoveAvailability = async (period) => {
 		if (!selectedCar) return;
 
-		await removeAvailabilityApiCall({
+		const data = await removeAvailabilityApiCall({
 			carId: selectedCar.id,
 			periods: [period],
 		});
 
-		await fetchAvailability();
+		if (data) {
+			await fetchAvailability();
+		}
 	};
 
 	const handleCarSelection = (car) => {

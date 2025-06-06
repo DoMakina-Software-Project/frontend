@@ -32,32 +32,25 @@ const ClientDashboardPage = () => {
 
 	// API hooks
 	const { handleApiCall: getBookingsApiCall, loading: loadingBookings } =
-		useApi(getClientBookings, {
-			onSuccess: (data) => {
-				calculateStats(data);
-			},
-			onError: (error) => {
-				toast.error("Failed to load bookings");
-			},
-		});
+		useApi(getClientBookings);
 
 	const { handleApiCall: getUpcomingApiCall, loading: loadingUpcoming } =
-		useApi(getClientUpcomingBookings, {
-			onSuccess: (data) => {
-				setUpcomingBookings(data.slice(0, 3)); // Show only first 3
-			},
-			onError: (error) => {
-				console.error("Failed to load upcoming bookings:", error);
-			},
-		});
+		useApi(getClientUpcomingBookings);
 
 	useEffect(() => {
 		fetchData();
 	}, []);
 
 	const fetchData = async () => {
-		await getBookingsApiCall();
-		await getUpcomingApiCall();
+		const bookingsData = await getBookingsApiCall();
+		if (bookingsData) {
+			calculateStats(bookingsData);
+		}
+
+		const upcomingData = await getUpcomingApiCall();
+		if (upcomingData) {
+			setUpcomingBookings(upcomingData.slice(0, 3)); // Show only first 3
+		}
 	};
 
 	const calculateStats = (bookings) => {

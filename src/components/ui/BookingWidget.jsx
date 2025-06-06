@@ -9,7 +9,7 @@ import toast from "react-hot-toast";
 
 const BookingWidget = ({ car }) => {
 	const navigate = useNavigate();
-	const { user } = useAuth();
+	const { currentUser } = useAuth();
 	const [startDate, setStartDate] = useState("");
 	const [endDate, setEndDate] = useState("");
 	const [paymentMethod, setPaymentMethod] = useState("CASH");
@@ -23,26 +23,12 @@ const BookingWidget = ({ car }) => {
 	const {
 		handleApiCall: checkAvailabilityApiCall,
 		loading: loadingAvailability,
-	} = useApi(checkBookingAvailability, {
-		onSuccess: (data) => {
-			setIsAvailable(data.isAvailable);
-		},
-		onError: () => {
-			setIsAvailable(false);
-			toast.error("Failed to check availability");
-		},
-	});
+	} = useApi(checkBookingAvailability);
 
 	const { handleApiCall: createBookingApiCall, loading: loadingBooking } =
 		useApi(createBooking, {
-			onSuccess: () => {
-				toast.success("Booking created successfully!");
-				setShowBookingModal(false);
-				navigate("/client/bookings");
-			},
-			onError: () => {
-				toast.error("Failed to create booking");
-			},
+			disableSuccessToast: false,
+			successMessage: "Booking created successfully!",
 		});
 
 	const { handleApiCall: getAvailabilityApiCall } = useApi(
@@ -100,21 +86,27 @@ const BookingWidget = ({ car }) => {
 	const checkAvailability = async () => {
 		if (!startDate || !endDate || !car) return;
 
-		await checkAvailabilityApiCall({
+		const data = await checkAvailabilityApiCall({
 			carId: car.id,
 			startDate,
 			endDate,
 		});
+
+		if (data) {
+			setIsAvailable(data.isAvailable);
+		} else {
+			setIsAvailable(false);
+		}
 	};
 
 	const handleBookNow = () => {
-		if (!user) {
+		if (!currentUser) {
 			toast.error("Please login to make a booking");
 			navigate("/login");
 			return;
 		}
 
-		if (user.id === car.sellerId) {
+		if (currentUser.id === car.sellerId) {
 			toast.error("You cannot book your own car");
 			return;
 		}
@@ -133,14 +125,19 @@ const BookingWidget = ({ car }) => {
 	};
 
 	const handleConfirmBooking = async () => {
-		if (!startDate || !endDate || !user) return;
+		if (!startDate || !endDate || !currentUser) return;
 
-		await createBookingApiCall({
+		const data = await createBookingApiCall({
 			carId: car.id,
 			startDate,
 			endDate,
 			paymentMethod,
 		});
+
+		if (data) {
+			setShowBookingModal(false);
+			navigate("/client/bookings");
+		}
 	};
 
 	const getMinDate = () => {
@@ -257,7 +254,7 @@ const BookingWidget = ({ car }) => {
 				size="large"
 			>
 				<FaCalendarAlt className="mr-2" />
-				{user ? "Book Now" : "Login to Book"}
+				{currentUser ? "Book Now" : "Login to Book"}
 			</Button>
 
 			{/* Info */}

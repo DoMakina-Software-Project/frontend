@@ -30,15 +30,6 @@ const SearchPage = () => {
 	const { handleApiCall: searchCarsApiCall, loading: loadingCars } = useApi(
 		searchCars,
 		{
-			onSuccess: (data) => {
-				if (page === 1) {
-					setCars(data.results);
-				} else {
-					setCars((prev) => [...prev, ...data.results]);
-				}
-				setHasNextPage(data.hasNextPage);
-				setTotalItems(data.totalItems);
-			},
 			onError: () => {
 				toast.error("Failed to search cars");
 			},
@@ -56,6 +47,12 @@ const SearchPage = () => {
 			listingType,
 			startDate: startDate || undefined,
 			endDate: endDate || undefined,
+		}).then((data) => {
+			if (data) {
+				setCars(data.results);
+				setHasNextPage(data.hasNextPage);
+				setTotalItems(data.totalItems);
+			}
 		});
 	}, [selectedBrandIds, minPrice, maxPrice, listingType, startDate, endDate]);
 
@@ -70,6 +67,12 @@ const SearchPage = () => {
 				listingType,
 				startDate: startDate || undefined,
 				endDate: endDate || undefined,
+			}).then((data) => {
+				if (data) {
+					setCars((prev) => [...prev, ...data.results]);
+					setHasNextPage(data.hasNextPage);
+					setTotalItems(data.totalItems);
+				}
 			});
 		}
 	}, [page]);
