@@ -8,6 +8,7 @@ import {
 	sellerCancelBooking,
 	sellerCompleteBooking,
 	getSellerBookingStats,
+	updatePaymentStatus,
 } from "../../../api/booking";
 import { useApi } from "../../../hooks";
 import {
@@ -74,6 +75,13 @@ const BookingManagementPage = () => {
 	const { handleApiCall: getStatsApiCall, loading: loadingStats } = useApi(
 		getSellerBookingStats,
 	);
+	const { handleApiCall: cashInApiCall, loading: loadingCashIn } = useApi(
+		updatePaymentStatus,
+		{
+			disableSuccessToast: false,
+			successMessage: "Payment marked as received!",
+		},
+	);
 
 	useEffect(() => {
 		fetchBookings();
@@ -122,6 +130,13 @@ const BookingManagementPage = () => {
 		}
 	};
 
+	const handleCashIn = async (bookingId) => {
+		const data = await cashInApiCall({ bookingId, paymentStatus: "PAID" });
+		if (data) {
+			fetchBookings();
+		}
+	};
+
 	const formatDate = (dateString) => {
 		return new Date(dateString).toLocaleDateString("en-US", {
 			weekday: "short",
@@ -141,7 +156,11 @@ const BookingManagementPage = () => {
 
 	const getActionButtons = (booking) => {
 		const isProcessing =
-			loadingConfirm || loadingReject || loadingCancel || loadingComplete;
+			loadingConfirm ||
+			loadingReject ||
+			loadingCancel ||
+			loadingComplete ||
+			loadingCashIn;
 
 		switch (booking.status) {
 			case "PENDING":
@@ -168,14 +187,29 @@ const BookingManagementPage = () => {
 			case "CONFIRMED":
 				return (
 					<div className="flex gap-2">
-						<Button
-							onClick={() => handleCompleteBooking(booking.id)}
-							disabled={isProcessing}
-							className="bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700"
-						>
-							<FaCheck className="mr-1" />
-							Complete
-						</Button>
+						{booking.paymentMethod === "CASH" &&
+							booking.paymentStatus === "PENDING" && (
+								<Button
+									onClick={() => handleCashIn(booking.id)}
+									disabled={isProcessing}
+									className="bg-green-600 px-3 py-1 text-sm text-white hover:bg-green-700"
+								>
+									<FaMoneyBillWave className="mr-1" />
+									Cash In
+								</Button>
+							)}
+						{booking.paymentStatus === "PAID" && (
+							<Button
+								onClick={() =>
+									handleCompleteBooking(booking.id)
+								}
+								disabled={isProcessing}
+								className="bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700"
+							>
+								<FaCheck className="mr-1" />
+								Complete
+							</Button>
+						)}
 						<Button
 							onClick={() => handleCancelBooking(booking.id)}
 							disabled={isProcessing}
@@ -192,6 +226,21 @@ const BookingManagementPage = () => {
 						No actions available
 					</span>
 				);
+		}
+	};
+
+	const getPaymentStatusColor = (status) => {
+		switch (status) {
+			case "PENDING":
+				return "bg-yellow-100 text-yellow-800";
+			case "PAID":
+				return "bg-green-100 text-green-800";
+			case "REFUNDED":
+				return "bg-blue-100 text-blue-800";
+			case "FAILED":
+				return "bg-red-100 text-red-800";
+			default:
+				return "bg-gray-100 text-gray-800";
 		}
 	};
 
@@ -317,10 +366,19 @@ const BookingManagementPage = () => {
 						<p className="mb-1 text-sm text-gray-600">
 							<strong>Total Price:</strong> ${booking.totalPrice}
 						</p>
-						<p className="text-sm text-gray-600">
-							<strong>Payment:</strong> {booking.paymentStatus} (
-							{booking.paymentMethod})
-						</p>
+						<div className="flex items-center gap-2">
+							<p className="text-sm text-gray-600">
+								<strong>Payment:</strong>{" "}
+								{booking.paymentMethod}
+							</p>
+							<span
+								className={`rounded-full px-2 py-1 text-xs font-medium ${getPaymentStatusColor(
+									booking.paymentStatus,
+								)}`}
+							>
+								{booking.paymentStatus}
+							</span>
+						</div>
 					</div>
 				</div>
 

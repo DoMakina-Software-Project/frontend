@@ -6,7 +6,6 @@ import {
 	getClientBookings,
 	getBookingById,
 	cancelBooking,
-	completeBooking,
 } from "../../../api/booking";
 import { useApi } from "../../../hooks";
 import {
@@ -43,12 +42,6 @@ const MyBookingsPage = () => {
 		useApi(cancelBooking, {
 			disableSuccessToast: false,
 			successMessage: "Booking cancelled successfully",
-		});
-
-	const { handleApiCall: completeBookingApiCall, loading: loadingComplete } =
-		useApi(completeBooking, {
-			disableSuccessToast: false,
-			successMessage: "Booking marked as completed",
 		});
 
 	useEffect(() => {
@@ -133,16 +126,6 @@ const MyBookingsPage = () => {
 		}
 	};
 
-	const handleCompleteBooking = async () => {
-		if (selectedBooking) {
-			const data = await completeBookingApiCall(selectedBooking.id);
-			if (data) {
-				setShowBookingModal(false);
-				fetchBookings();
-			}
-		}
-	};
-
 	const getStatusIcon = (status) => {
 		switch (status) {
 			case "PENDING":
@@ -169,6 +152,21 @@ const MyBookingsPage = () => {
 				return "bg-blue-100 text-blue-800 border-blue-200";
 			case "CANCELLED":
 			case "REJECTED":
+				return "bg-red-100 text-red-800 border-red-200";
+			default:
+				return "bg-gray-100 text-gray-800 border-gray-200";
+		}
+	};
+
+	const getPaymentStatusColor = (status) => {
+		switch (status) {
+			case "PENDING":
+				return "bg-yellow-100 text-yellow-800 border-yellow-200";
+			case "PAID":
+				return "bg-green-100 text-green-800 border-green-200";
+			case "REFUNDED":
+				return "bg-blue-100 text-blue-800 border-blue-200";
+			case "FAILED":
 				return "bg-red-100 text-red-800 border-red-200";
 			default:
 				return "bg-gray-100 text-gray-800 border-gray-200";
@@ -205,20 +203,6 @@ const MyBookingsPage = () => {
 			);
 		}
 
-		if (booking.status === "CONFIRMED") {
-			buttons.push(
-				<Button
-					key="complete"
-					size="small"
-					variant="success"
-					onClick={() => handleViewBooking(booking.id)}
-					className="flex-1"
-				>
-					Complete
-				</Button>,
-			);
-		}
-
 		return buttons;
 	};
 
@@ -249,14 +233,23 @@ const MyBookingsPage = () => {
 						</p>
 					</div>
 				</div>
-				<div className="flex items-center gap-2">
-					{getStatusIcon(booking.status)}
+				<div className="flex flex-col items-end gap-2">
+					<div className="flex items-center gap-2">
+						{getStatusIcon(booking.status)}
+						<span
+							className={`rounded-full border px-3 py-1 text-sm font-medium ${getStatusColor(
+								booking.status,
+							)}`}
+						>
+							{booking.status}
+						</span>
+					</div>
 					<span
-						className={`rounded-full border px-3 py-1 text-sm font-medium ${getStatusColor(
-							booking.status,
+						className={`rounded-full border px-3 py-1 text-sm font-medium ${getPaymentStatusColor(
+							booking.paymentStatus,
 						)}`}
 					>
-						{booking.status}
+						{booking.paymentStatus}
 					</span>
 				</div>
 			</div>
@@ -281,8 +274,8 @@ const MyBookingsPage = () => {
 					</p>
 				</div>
 				<div>
-					<p className="text-xs text-gray-500">Payment</p>
-					<p className="font-medium">{booking.paymentStatus}</p>
+					<p className="text-xs text-gray-500">Payment Method</p>
+					<p className="font-medium">{booking.paymentMethod}</p>
 				</div>
 			</div>
 
@@ -408,19 +401,23 @@ const MyBookingsPage = () => {
 							</div>
 							<div>
 								<p className="text-sm text-gray-500">
-									Payment Status
-								</p>
-								<p className="font-medium">
-									{selectedBooking.paymentStatus}
-								</p>
-							</div>
-							<div>
-								<p className="text-sm text-gray-500">
 									Payment Method
 								</p>
 								<p className="font-medium">
 									{selectedBooking.paymentMethod}
 								</p>
+							</div>
+							<div>
+								<p className="text-sm text-gray-500">
+									Payment Status
+								</p>
+								<span
+									className={`rounded-full border px-2 py-1 text-sm font-medium ${getPaymentStatusColor(
+										selectedBooking.paymentStatus,
+									)}`}
+								>
+									{selectedBooking.paymentStatus}
+								</span>
 							</div>
 							<div>
 								<p className="text-sm text-gray-500">
@@ -447,18 +444,6 @@ const MyBookingsPage = () => {
 								{loadingCancel
 									? "Cancelling..."
 									: "Cancel Booking"}
-							</Button>
-						)}
-						{selectedBooking.status === "CONFIRMED" && (
-							<Button
-								variant="success"
-								onClick={handleCompleteBooking}
-								disabled={loadingComplete}
-								className="flex-1"
-							>
-								{loadingComplete
-									? "Completing..."
-									: "Mark as Completed"}
 							</Button>
 						)}
 						<Button

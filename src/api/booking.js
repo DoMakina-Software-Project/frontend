@@ -45,11 +45,11 @@ export const sellerCancelBooking = (bookingId) =>
 export const sellerCompleteBooking = (bookingId) =>
 	axios.patch(`/seller/bookings/${bookingId}/complete`);
 
-export const updateBookingStatus = (bookingId, status) =>
+export const updateBookingStatus = ({ bookingId, status }) =>
 	axios.patch(`/seller/bookings/${bookingId}/status`, { status });
 
-export const updatePaymentStatus = (bookingId, paymentData) =>
-	axios.patch(`/seller/bookings/${bookingId}/payment`, paymentData);
+export const updatePaymentStatus = ({ bookingId, paymentStatus }) =>
+	axios.patch(`/seller/bookings/${bookingId}/payment`, { paymentStatus });
 
 export const getSellerUpcomingBookings = () =>
 	axios.get("/seller/bookings/upcoming", { params: { userType: "seller" } });
