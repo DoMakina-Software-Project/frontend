@@ -35,29 +35,13 @@ const RentalAvailabilityPage = () => {
 		useApi(getCars);
 	const { handleApiCall: addAvailabilityApiCall, loading: loadingAdd } =
 		useApi(addRentalAvailability, {
-			onSuccess: () => {
-				toast.success("Availability period added successfully!");
-				fetchAvailability();
-			},
-			onError: (error) => {
-				toast.error(
-					error?.response?.data?.message ||
-						"Failed to add availability period",
-				);
-			},
+			disableSuccessToast: false,
+			successMessage: "Availability period added successfully!",
 		});
 	const { handleApiCall: removeAvailabilityApiCall, loading: loadingRemove } =
 		useApi(removeRentalAvailability, {
-			onSuccess: () => {
-				toast.success("Availability period removed successfully!");
-				fetchAvailability();
-			},
-			onError: (error) => {
-				toast.error(
-					error?.response?.data?.message ||
-						"Failed to remove availability period",
-				);
-			},
+			disableSuccessToast: false,
+			successMessage: "Availability period removed successfully!",
 		});
 	const {
 		handleApiCall: getAvailabilityApiCall,
@@ -95,10 +79,6 @@ const RentalAvailabilityPage = () => {
 			// Filter only rental cars
 			const rentalCars = data.filter((car) => car.listingType === "RENT");
 			setCars(rentalCars);
-
-			if (rentalCars.length === 0) {
-				toast.info("You don't have any cars listed for rent yet.");
-			}
 		}
 	};
 
@@ -129,23 +109,27 @@ const RentalAvailabilityPage = () => {
 	const handleAddAvailability = async (dateRange) => {
 		if (!selectedCar) return;
 
-		await addAvailabilityApiCall({
+		const data = await addAvailabilityApiCall({
 			carId: selectedCar.id,
 			periods: [dateRange],
 		});
 
-		await fetchAvailability();
+		if (data) {
+			await fetchAvailability();
+		}
 	};
 
 	const handleRemoveAvailability = async (period) => {
 		if (!selectedCar) return;
 
-		await removeAvailabilityApiCall({
+		const data = await removeAvailabilityApiCall({
 			carId: selectedCar.id,
 			periods: [period],
 		});
 
-		await fetchAvailability();
+		if (data) {
+			await fetchAvailability();
+		}
 	};
 
 	const handleCarSelection = (car) => {
@@ -163,17 +147,14 @@ const RentalAvailabilityPage = () => {
 					<div className="h-8 w-8 animate-spin rounded-full border-4 border-theme-blue border-t-transparent"></div>
 				</div>
 			) : cars.length === 0 ? (
-				<div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
+				<div className="flex flex-col items-center justify-center rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
 					<FaCar className="mx-auto mb-3 text-4xl text-gray-400" />
-					<p className="mb-4 text-gray-600">No rental cars found</p>
-					<p className="text-sm text-gray-500">
+					<p className="text-gray-600">No rental cars found</p>
+					<p className="mb-6 text-sm text-gray-500">
 						You need to have cars listed for rent to manage
 						availability.
 					</p>
-					<Button
-						className="mt-4"
-						onClick={() => navigate("/seller/list-car")}
-					>
+					<Button onClick={() => navigate("/seller/list-car")}>
 						List a Car for Rent
 					</Button>
 				</div>
@@ -326,6 +307,15 @@ const RentalAvailabilityPage = () => {
 									for booking
 								</p>
 							</div>
+						</div>
+						<div className="flex gap-2">
+							<button
+								onClick={() => navigate("/seller/bookings")}
+								className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-white transition-colors hover:bg-green-700"
+							>
+								<FaCalendarAlt size={16} />
+								View Bookings
+							</button>
 						</div>
 					</div>
 

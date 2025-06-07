@@ -47,7 +47,7 @@ const CarCard = ({
 										className="mr-3 w-5"
 										size={20}
 									/>
-									Manage Availability
+									Availability
 								</button>
 							)}
 

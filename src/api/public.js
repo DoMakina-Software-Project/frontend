@@ -7,13 +7,24 @@ export const fetchCars = () => axios.get("/public/cars");
 export const fetchFiveLatestPromotionCars = () =>
 	axios.get("/public/cars/latest-promotions");
 
-export const searchCars = ({ minPrice, maxPrice, brandIds, page }) =>
+export const searchCars = ({
+	minPrice,
+	maxPrice,
+	brandIds,
+	page,
+	listingType,
+	startDate,
+	endDate,
+}) =>
 	axios.get("/public/cars/search", {
 		params: {
 			minPrice,
 			maxPrice,
 			brandIds,
 			page,
+			listingType,
+			startDate,
+			endDate,
 		},
 	});
 

@@ -91,3 +91,17 @@ export const getAvailableDatesInRange = ({ carId, startDate, endDate }) =>
 		startDate,
 		endDate,
 	});
+
+// Booking Management (Re-export from booking.js for convenience)
+export {
+	getSellerBookings,
+	getSellerBookingById,
+	confirmBooking,
+	rejectBooking,
+	sellerCancelBooking,
+	sellerCompleteBooking,
+	updateBookingStatus,
+	updatePaymentStatus,
+	getSellerUpcomingBookings,
+	getSellerBookingStats,
+} from "./booking";
