@@ -72,7 +72,7 @@ export default function HeroSection() {
 				</div>
 
 				{/* Right Content */}
-				{promotedCars.length > 0 && (
+				{promotedCars?.length > 0 && (
 					<div className="max-w-sm">
 						<CarDetailsCard data={promotedCars[index]} />
 						{promotedCars.length > 1 && (
