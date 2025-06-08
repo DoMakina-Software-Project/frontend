@@ -34,6 +34,16 @@ const Header = () => {
 			roles: ["CLIENT", "SELLER", "STAFF", "SUPERADMIN"],
 		},
 		{
+			title: "My Profile",
+			link: "/client",
+			roles: ["CLIENT"],
+		},
+		{
+			title: "My Bookings",
+			link: "/client/bookings",
+			roles: ["CLIENT"],
+		},
+		{
 			title: "Dashboard",
 			link: "/seller",
 			roles: ["SELLER"],

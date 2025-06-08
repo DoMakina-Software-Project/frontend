@@ -32,6 +32,8 @@ const MyBookingsPage = () => {
 	const [statusFilter, setStatusFilter] = useState(
 		searchParams.get("status") || "all",
 	);
+	const [currentPage, setCurrentPage] = useState(1);
+	const [itemsPerPage] = useState(6); // Show 6 bookings per page
 
 	// API hooks
 	const { handleApiCall: getBookingsApiCall, loading: loadingBookings } =
@@ -60,6 +62,12 @@ const MyBookingsPage = () => {
 			filterBookings(data, statusFilter);
 		}
 	};
+
+	// Calculate pagination
+	const indexOfLastItem = currentPage * itemsPerPage;
+	const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+	const currentBookings = filteredBookings.slice(indexOfFirstItem, indexOfLastItem);
+	const totalPages = Math.ceil(filteredBookings.length / itemsPerPage);
 
 	const filterBookings = (allBookings, filter) => {
 		let filtered = allBookings;
@@ -97,6 +105,7 @@ const MyBookingsPage = () => {
 		}
 
 		setFilteredBookings(filtered);
+		setCurrentPage(1); // Reset to first page when filter changes
 	};
 
 	const handleStatusFilter = (status) => {
@@ -107,6 +116,11 @@ const MyBookingsPage = () => {
 			searchParams.set("status", status);
 		}
 		setSearchParams(searchParams);
+	};
+
+	const handlePageChange = (pageNumber) => {
+		setCurrentPage(pageNumber);
+		window.scrollTo({ top: 0, behavior: 'smooth' });
 	};
 
 	const handleViewBooking = async (bookingId) => {
@@ -468,10 +482,98 @@ const MyBookingsPage = () => {
 		);
 	};
 
+	const PaginationComponent = () => {
+		if (totalPages <= 1) return null;
+
+		const pageNumbers = [];
+		const maxVisiblePages = 5;
+		let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+		let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+		// Adjust startPage if we're near the end
+		if (endPage - startPage + 1 < maxVisiblePages) {
+			startPage = Math.max(1, endPage - maxVisiblePages + 1);
+		}
+
+		for (let i = startPage; i <= endPage; i++) {
+			pageNumbers.push(i);
+		}
+
+		return (
+			<div className="flex items-center justify-center space-x-2 mt-8">
+				<button
+					onClick={() => handlePageChange(currentPage - 1)}
+					disabled={currentPage === 1}
+					className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+						currentPage === 1
+							? "bg-gray-100 text-gray-400 cursor-not-allowed"
+							: "bg-white text-gray-700 hover:bg-gray-50 border border-gray-300"
+					}`}
+				>
+					Previous
+				</button>
+
+				{startPage > 1 && (
+					<>
+						<button
+							onClick={() => handlePageChange(1)}
+							className="px-3 py-2 rounded-lg text-sm font-medium bg-white text-gray-700 hover:bg-gray-50 border border-gray-300"
+						>
+							1
+						</button>
+						{startPage > 2 && (
+							<span className="px-2 py-2 text-gray-500">...</span>
+						)}
+					</>
+				)}
+
+				{pageNumbers.map((number) => (
+					<button
+						key={number}
+						onClick={() => handlePageChange(number)}
+						className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+							currentPage === number
+								? "bg-theme-blue text-white"
+								: "bg-white text-gray-700 hover:bg-gray-50 border border-gray-300"
+						}`}
+					>
+						{number}
+					</button>
+				))}
+
+				{endPage < totalPages && (
+					<>
+						{endPage < totalPages - 1 && (
+							<span className="px-2 py-2 text-gray-500">...</span>
+						)}
+						<button
+							onClick={() => handlePageChange(totalPages)}
+							className="px-3 py-2 rounded-lg text-sm font-medium bg-white text-gray-700 hover:bg-gray-50 border border-gray-300"
+						>
+							{totalPages}
+						</button>
+					</>
+				)}
+
+				<button
+					onClick={() => handlePageChange(currentPage + 1)}
+					disabled={currentPage === totalPages}
+					className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+						currentPage === totalPages
+							? "bg-gray-100 text-gray-400 cursor-not-allowed"
+							: "bg-white text-gray-700 hover:bg-gray-50 border border-gray-300"
+					}`}
+				>
+					Next
+				</button>
+			</div>
+		);
+	};
+
 	return (
 		<MainLayout>
-			<div className="min-h-screen bg-gray-50">
-				<div className="mx-auto max-w-7xl px-6 py-8">
+			<div className="flex flex-grow justify-center bg-gray-50">
+				<div className="w-full max-w-6xl px-6 py-8 bg-white shadow-lg rounded-lg my-4">
 					{/* Header */}
 					<div className="mb-8 flex items-center justify-between">
 						<div className="flex items-center gap-4">
@@ -520,6 +622,20 @@ const MyBookingsPage = () => {
 						))}
 					</div>
 
+					{/* Results Summary */}
+					{!loadingBookings && filteredBookings.length > 0 && (
+						<div className="mb-4 flex items-center justify-between text-sm text-gray-600">
+							<span>
+								Showing {indexOfFirstItem + 1}-{Math.min(indexOfLastItem, filteredBookings.length)} of {filteredBookings.length} bookings
+							</span>
+							{totalPages > 1 && (
+								<span>
+									Page {currentPage} of {totalPages}
+								</span>
+							)}
+						</div>
+					)}
+
 					{/* Bookings List */}
 					{loadingBookings ? (
 						<div className="flex items-center justify-center py-12">
@@ -542,7 +658,7 @@ const MyBookingsPage = () => {
 						</div>
 					) : (
 						<div className="space-y-4">
-							{filteredBookings.map((booking) => (
+							{currentBookings.map((booking) => (
 								<BookingCard
 									key={booking.id}
 									booking={booking}
@@ -550,6 +666,9 @@ const MyBookingsPage = () => {
 							))}
 						</div>
 					)}
+
+					{/* Pagination */}
+					<PaginationComponent />
 				</div>
 			</div>
 
