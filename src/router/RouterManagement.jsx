@@ -33,6 +33,7 @@ import {
 	StaffBrandsPage,
 	StaffEditBrandPage,
 	StaffCreateBrandPage,
+	StaffCarVerificationPage,
 } from "../pages/private/staff";
 import { OnboardingPage } from "../pages/onboarding";
 import { SelectRolePage } from "../pages/private";
@@ -112,6 +113,10 @@ const RouterManagement = () => {
 					<Route
 						path="brands/edit/:id"
 						element={<StaffEditBrandPage />}
+					/>
+					<Route
+						path="car-verification"
+						element={<StaffCarVerificationPage />}
 					/>
 				</Route>
 

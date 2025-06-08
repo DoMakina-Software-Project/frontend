@@ -31,7 +31,7 @@ const Header = () => {
 			onClick: () => {
 				navigate("/select-role");
 			},
-			roles: ["CLIENT", "SELLER", "STAFF", "SUPERADMIN"],
+			roles: ["ALL"],
 		},
 		{
 			title: "Dashboard",
@@ -69,9 +69,14 @@ const Header = () => {
 			roles: ["SUPERADMIN"],
 		},
 		{
+			title: "Car Verification",
+			link: "/staff/car-verification",
+			roles: ["STAFF", "SUPERADMIN"],
+		},
+		{
 			title: "Log out",
 			onClick: handleLogout,
-			roles: ["CLIENT", "SELLER", "STAFF", "SUPERADMIN"],
+			roles: ["ALL"],
 		},
 	];
 
@@ -112,7 +117,10 @@ const Header = () => {
 						{isDropdownOpen && (
 							<div className="absolute right-0 z-40 mt-2 w-40 overflow-hidden rounded-md bg-white text-theme-text shadow-md">
 								{menu.map((item, index) => {
-									if (item.roles.includes(selectedRole)) {
+									if (
+										item.roles.includes(selectedRole) ||
+										item.roles.includes("ALL")
+									) {
 										if (item.link) {
 											return (
 												<Link
