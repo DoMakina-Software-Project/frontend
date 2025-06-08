@@ -1,29 +1,25 @@
 import { CarCard } from "../Search";
-import { LocalStorageUtils } from "../../../utils";
 import { useState, useEffect } from "react";
-import { getWishlistCars } from "../../../api/public";
+import { getUserWishlist, removeFromWishlist } from "../../../api/client";
 import { useApi } from "../../../hooks";
 
 export default function WishlistGrid() {
 	const [cars, setCars] = useState([]);
 
-	const { handleApiCall: getWishlistCarsApiCall } = useApi(getWishlistCars);
-
-	const [wishlistIds, setWishlistIds] = useState(
-		LocalStorageUtils.getItem("wishlist") || [],
-	);
+	const { handleApiCall: getUserWishlistApiCall } = useApi(getUserWishlist);
+	const { handleApiCall: removeFromWishlistApiCall } = useApi(removeFromWishlist);
 
 	const removeWishlistCar = (carId) => {
-		const newWishlistCars = cars.filter((car) => car.id !== carId);
-		const newWishlistIds = wishlistIds.filter((id) => id !== carId);
-		LocalStorageUtils.setItem("wishlist", newWishlistIds);
-		setWishlistIds(newWishlistIds);
-		setCars(newWishlistCars);
+		removeFromWishlistApiCall(carId).then(() => {
+			setCars((prevCars) => prevCars.filter((car) => car.Car.id !== carId));
+		});
 	};
 
 	useEffect(() => {
-		getWishlistCarsApiCall({ ids: wishlistIds }).then((data) => {
-			setCars(data);
+		getUserWishlistApiCall().then((data) => {
+			if (data) {
+				setCars(data);
+			}
 		});
 	}, []);
 
@@ -40,10 +36,10 @@ export default function WishlistGrid() {
 			<div className="flex w-full max-w-7xl flex-col items-center justify-center">
 				{/* Wishlist Car Cards Grid */}
 				<div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
-					{cars.map((car, index) => (
+					{cars.map((wishlistItem, index) => (
 						<CarCard
 							key={index}
-							car={car}
+							car={wishlistItem.Car}
 							removeWishlistCar={removeWishlistCar}
 						/>
 					))}
