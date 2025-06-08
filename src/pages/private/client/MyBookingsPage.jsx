@@ -7,7 +7,7 @@ import {
 	getBookingById,
 	cancelBooking,
 } from "../../../api/booking";
-import { useApi } from "../../../hooks";
+import { useApi, useConfirmation } from "../../../hooks";
 import {
 	FaCalendarAlt,
 	FaCar,
@@ -23,6 +23,7 @@ import {
 
 const MyBookingsPage = () => {
 	const navigate = useNavigate();
+	const { showConfirmation } = useConfirmation();
 	const [searchParams, setSearchParams] = useSearchParams();
 	const [bookings, setBookings] = useState([]);
 	const [filteredBookings, setFilteredBookings] = useState([]);
@@ -118,11 +119,19 @@ const MyBookingsPage = () => {
 
 	const handleCancelBooking = async () => {
 		if (selectedBooking) {
-			const data = await cancelBookingApiCall(selectedBooking.id);
-			if (data) {
-				setShowBookingModal(false);
-				fetchBookings();
-			}
+			showConfirmation({
+				title: "Cancel Booking",
+				message: `Are you sure you want to cancel your booking for ${selectedBooking.Car.Brand?.name} ${selectedBooking.Car.model}? This action cannot be undone.`,
+				confirmText: "Yes, Cancel",
+				cancelText: "Keep Booking",
+				onConfirm: async () => {
+					const data = await cancelBookingApiCall(selectedBooking.id);
+					if (data) {
+						setShowBookingModal(false);
+						fetchBookings();
+					}
+				},
+			});
 		}
 	};
 

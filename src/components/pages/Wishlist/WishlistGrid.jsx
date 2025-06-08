@@ -2,10 +2,11 @@ import { CarCard } from "../Search";
 import { LocalStorageUtils } from "../../../utils";
 import { useState, useEffect } from "react";
 import { getWishlistCars } from "../../../api/public";
-import { useApi } from "../../../hooks";
+import { useApi, useConfirmation } from "../../../hooks";
 
 export default function WishlistGrid() {
 	const [cars, setCars] = useState([]);
+	const { showConfirmation } = useConfirmation();
 
 	const { handleApiCall: getWishlistCarsApiCall } = useApi(getWishlistCars);
 
@@ -14,11 +15,21 @@ export default function WishlistGrid() {
 	);
 
 	const removeWishlistCar = (carId) => {
-		const newWishlistCars = cars.filter((car) => car.id !== carId);
-		const newWishlistIds = wishlistIds.filter((id) => id !== carId);
-		LocalStorageUtils.setItem("wishlist", newWishlistIds);
-		setWishlistIds(newWishlistIds);
-		setCars(newWishlistCars);
+		const car = cars.find((c) => c.id === carId);
+
+		showConfirmation({
+			title: "Remove from Wishlist",
+			message: `Are you sure you want to remove "${car?.Brand?.name} ${car?.model} (${car?.year})" from your wishlist?`,
+			confirmText: "Yes, Remove",
+			cancelText: "Cancel",
+			onConfirm: () => {
+				const newWishlistCars = cars.filter((car) => car.id !== carId);
+				const newWishlistIds = wishlistIds.filter((id) => id !== carId);
+				LocalStorageUtils.setItem("wishlist", newWishlistIds);
+				setWishlistIds(newWishlistIds);
+				setCars(newWishlistCars);
+			},
+		});
 	};
 
 	useEffect(() => {

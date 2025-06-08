@@ -5,3 +5,4 @@ export { default as TextArea } from "./TextArea";
 export { DateRangePicker, AvailabilityPeriodsList } from "./DateRangePicker";
 export { default as BookingWidget } from "./BookingWidget";
 export { default as Modal } from "./Modal";
+export { default as ConfirmationDialog } from "./ConfirmationDialog";

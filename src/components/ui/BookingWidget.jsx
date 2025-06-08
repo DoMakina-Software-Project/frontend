@@ -2,21 +2,20 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Modal } from "./";
 import { createBooking, checkBookingAvailability } from "../../api/booking";
-import { getAvailableDatesInRange } from "../../api/seller";
-import { useApi, useAuth } from "../../hooks";
+import { useApi, useAuth, useConfirmation } from "../../hooks";
 import { FaCalendarAlt, FaInfoCircle, FaCheckCircle } from "react-icons/fa";
 import toast from "react-hot-toast";
 
 const BookingWidget = ({ car }) => {
 	const navigate = useNavigate();
 	const { currentUser } = useAuth();
+	const { showConfirmation } = useConfirmation();
 	const [startDate, setStartDate] = useState("");
 	const [endDate, setEndDate] = useState("");
 	const [paymentMethod, setPaymentMethod] = useState("CASH");
 	const [totalPrice, setTotalPrice] = useState(0);
 	const [totalDays, setTotalDays] = useState(0);
 	const [showBookingModal, setShowBookingModal] = useState(false);
-	const [availabilityPeriods, setAvailabilityPeriods] = useState([]);
 	const [isAvailable, setIsAvailable] = useState(null);
 
 	// API hooks
@@ -31,16 +30,6 @@ const BookingWidget = ({ car }) => {
 			successMessage: "Booking created successfully!",
 		});
 
-	const { handleApiCall: getAvailabilityApiCall } = useApi(
-		getAvailableDatesInRange,
-	);
-
-	useEffect(() => {
-		if (car && car.listingType === "RENT") {
-			fetchAvailability();
-		}
-	}, [car]);
-
 	useEffect(() => {
 		if (startDate && endDate) {
 			calculatePrice();
@@ -51,25 +40,6 @@ const BookingWidget = ({ car }) => {
 			setIsAvailable(null);
 		}
 	}, [startDate, endDate, car]);
-
-	const fetchAvailability = async () => {
-		if (!car) return;
-
-		// Get availability for next 6 months
-		const start = new Date();
-		const end = new Date();
-		end.setMonth(end.getMonth() + 6);
-
-		const data = await getAvailabilityApiCall({
-			carId: car.id,
-			startDate: start.toISOString().split("T")[0],
-			endDate: end.toISOString().split("T")[0],
-		});
-
-		if (data) {
-			setAvailabilityPeriods(data);
-		}
-	};
 
 	const calculatePrice = () => {
 		if (!startDate || !endDate || !car) return;
@@ -127,17 +97,25 @@ const BookingWidget = ({ car }) => {
 	const handleConfirmBooking = async () => {
 		if (!startDate || !endDate || !currentUser) return;
 
-		const data = await createBookingApiCall({
-			carId: car.id,
-			startDate,
-			endDate,
-			paymentMethod,
-		});
+		showConfirmation({
+			title: "Confirm Booking",
+			message: `Are you sure you want to book this ${car.brand} ${car.model} for ${totalDays} day${totalDays > 1 ? "s" : ""} at $${totalPrice}?`,
+			confirmText: "Yes, Book Now",
+			cancelText: "Cancel",
+			onConfirm: async () => {
+				const data = await createBookingApiCall({
+					carId: car.id,
+					startDate,
+					endDate,
+					paymentMethod,
+				});
 
-		if (data) {
-			setShowBookingModal(false);
-			navigate("/client/bookings");
-		}
+				if (data) {
+					setShowBookingModal(false);
+					navigate("/client/bookings");
+				}
+			},
+		});
 	};
 
 	const getMinDate = () => {

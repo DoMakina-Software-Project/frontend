@@ -51,6 +51,9 @@ export const updateBookingStatus = ({ bookingId, status }) =>
 export const updatePaymentStatus = ({ bookingId, paymentStatus }) =>
 	axios.patch(`/seller/bookings/${bookingId}/payment`, { paymentStatus });
 
+export const refundBooking = (bookingId) =>
+	axios.patch(`/seller/bookings/${bookingId}/refund`);
+
 export const getSellerUpcomingBookings = () =>
 	axios.get("/seller/bookings/upcoming", { params: { userType: "seller" } });
 
