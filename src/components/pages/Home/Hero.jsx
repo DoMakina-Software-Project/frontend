@@ -33,11 +33,11 @@ export default function HeroSection() {
 				{/* Left Content */}
 				<div className="flex-1">
 					<h1 className="mb-6 text-4xl font-bold leading-tight text-white lg:text-5xl">
-						Find & sell your best car easily
+						Albania's Premier Car Marketplace
 					</h1>
 					<p className="mb-8 text-gray-400">
-						We will help you sell or buy your dream car here easily
-						and quickly that is reliable.
+						Buy, sell, or rent cars across Albania with confidence.
+						From Tirana to Durrës, find your perfect vehicle.
 					</p>
 					<div>
 						<div className="mb-2 flex gap-1">
@@ -50,9 +50,11 @@ export default function HeroSection() {
 						</div>
 						<div className="flex items-center gap-2">
 							<span className="text-2xl font-bold text-white">
-								12k+
+								Trusted
 							</span>
-							<span className="text-gray-400">Good Reviews</span>
+							<span className="text-gray-400">
+								Car Marketplace
+							</span>
 						</div>
 					</div>
 				</div>

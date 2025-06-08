@@ -6,21 +6,21 @@ export default function FeaturesSection() {
 	const features = [
 		{
 			icon: FiUser,
-			title: "Quality Choice",
+			title: "Verified Listings",
 			description:
-				"We provide several quality car option for you so you don't have to worry about the quality.",
+				"Every car listing is verified to ensure accurate information and genuine sellers, providing you with a trustworthy car buying experience in Albania.",
 		},
 		{
 			icon: MdStarBorder,
-			title: "Exclusive Service For You",
+			title: "Nationwide Coverage",
 			description:
-				"We are ready to help find your dream car for your daily needs",
+				"Access car listings from all major cities in Albania, including Tirana, Durrës, Vlorë, and more. Find the perfect car near you.",
 		},
 		{
 			icon: GoZap,
-			title: "Fast and Safe Transaction",
+			title: "Flexible Options",
 			description:
-				"Transaction process is completed within 24 hours (verified by Bank International)",
+				"Choose between buying and renting vehicles. Whether you need a car for a day or want to make a purchase, we've got you covered.",
 		},
 	];
 
