@@ -9,16 +9,21 @@ import {
 	FaEdit,
 	FaCheck,
 	FaTimes,
+	FaClock,
+	FaEye,
 } from "react-icons/fa";
 import {
 	getPromotionPrice,
 	createPromotionPrice,
 	updatePromotionPrice,
 	getDashboardData,
+	getVerificationStats,
 } from "../../../api/staff";
 import { useApi } from "../../../hooks";
+import { useNavigate } from "react-router-dom";
 
 export default function StaffDashboardPage() {
+	const navigate = useNavigate();
 	const { handleApiCall: getDashboardDataApiCall } = useApi(getDashboardData);
 	const { handleApiCall: getPromotionPriceApiCall } = useApi(
 		getPromotionPrice,
@@ -30,6 +35,8 @@ export default function StaffDashboardPage() {
 		useApi(createPromotionPrice);
 	const { handleApiCall: updatePromotionPriceApiCall } =
 		useApi(updatePromotionPrice);
+	const { handleApiCall: getVerificationStatsApiCall } =
+		useApi(getVerificationStats);
 
 	const [dashboardData, setDashboardData] = useState({
 		numberOfUser: 0,
@@ -47,6 +54,13 @@ export default function StaffDashboardPage() {
 
 	const [promotionPrice, setPromotionPrice] = useState(null);
 	const [isPromotionExisting, setIsPromotionExisting] = useState(false); // Track if it exists
+	const [verificationStats, setVerificationStats] = useState({
+		pending: 0,
+		approved: 0,
+		rejected: 0,
+		total: 0,
+	});
+
 	const handlePromotionPriceUpdate = async (newPrice) => {
 		if (isPromotionExisting) {
 			// If promotion exists, update it
@@ -81,6 +95,11 @@ export default function StaffDashboardPage() {
 		getDashboardDataApiCall().then((data) => {
 			if (data) {
 				setDashboardData(data);
+			}
+		});
+		getVerificationStatsApiCall().then((data) => {
+			if (data) {
+				setVerificationStats(data);
 			}
 		});
 	}, []);
@@ -127,6 +146,91 @@ export default function StaffDashboardPage() {
 								}
 							/>
 						</div>
+					</section>
+
+					{/* Car Verification Section */}
+					<section className="rounded-lg bg-white p-6 shadow-lg">
+						<div className="mb-6 flex items-center justify-between">
+							<h2 className="flex items-center text-2xl font-semibold text-gray-800">
+								<FaCarSide className="mr-2 text-blue-600" />
+								Car Verification
+							</h2>
+							<button
+								onClick={() =>
+									navigate("/staff/car-verification")
+								}
+								className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700"
+							>
+								<FaEye />
+								View All
+							</button>
+						</div>
+						<div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
+							<div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4">
+								<div className="flex items-center gap-3">
+									<FaClock className="text-2xl text-yellow-600" />
+									<div>
+										<p className="text-sm text-yellow-700">
+											Pending Review
+										</p>
+										<p className="text-2xl font-bold text-yellow-800">
+											{verificationStats.pending}
+										</p>
+									</div>
+								</div>
+							</div>
+							<div className="rounded-lg border border-green-200 bg-green-50 p-4">
+								<div className="flex items-center gap-3">
+									<FaCheck className="text-2xl text-green-600" />
+									<div>
+										<p className="text-sm text-green-700">
+											Approved
+										</p>
+										<p className="text-2xl font-bold text-green-800">
+											{verificationStats.approved}
+										</p>
+									</div>
+								</div>
+							</div>
+							<div className="rounded-lg border border-red-200 bg-red-50 p-4">
+								<div className="flex items-center gap-3">
+									<FaTimes className="text-2xl text-red-600" />
+									<div>
+										<p className="text-sm text-red-700">
+											Rejected
+										</p>
+										<p className="text-2xl font-bold text-red-800">
+											{verificationStats.rejected}
+										</p>
+									</div>
+								</div>
+							</div>
+							<div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+								<div className="flex items-center gap-3">
+									<FaChartBar className="text-2xl text-blue-600" />
+									<div>
+										<p className="text-sm text-blue-700">
+											Total Cars
+										</p>
+										<p className="text-2xl font-bold text-blue-800">
+											{verificationStats.total}
+										</p>
+									</div>
+								</div>
+							</div>
+						</div>
+						{verificationStats.pending > 0 && (
+							<div className="mt-4 rounded-lg border border-yellow-200 bg-yellow-50 p-4">
+								<p className="text-sm text-yellow-800">
+									<strong>Action Required:</strong> You have{" "}
+									{verificationStats.pending} car
+									{verificationStats.pending === 1
+										? ""
+										: "s"}{" "}
+									waiting for verification.
+								</p>
+							</div>
+						)}
 					</section>
 
 					<section>

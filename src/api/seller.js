@@ -5,6 +5,9 @@ export const createSellerProfile = (formData) =>
 
 export const getCars = () => axios.get("/seller/cars");
 
+export const getVerificationStats = () =>
+	axios.get("/seller/cars/verification/stats");
+
 export const deleteCar = ({ id }) => axios.delete(`/seller/cars/${id}`);
 
 /**

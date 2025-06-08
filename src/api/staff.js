@@ -27,3 +27,24 @@ export const updatePromotionPrice = ({ price }) =>
 	axios.put(`/staff/promotion-prices`, { price });
 
 export const getDashboardData = () => axios.get("/staff/dashboard");
+
+// Car Verification
+export const getUnverifiedCars = ({
+	page = 1,
+	limit = 10,
+	status = "PENDING",
+}) =>
+	axios.get(
+		`/staff/cars/unverified?page=${page}&limit=${limit}&status=${status}`,
+	);
+
+export const getCarForVerification = ({ id }) =>
+	axios.get(`/staff/cars/${id}/verification`);
+
+export const approveCar = ({ id }) => axios.put(`/staff/cars/${id}/approve`);
+
+export const rejectCar = ({ id, reason }) =>
+	axios.put(`/staff/cars/${id}/reject`, { reason });
+
+export const getVerificationStats = () =>
+	axios.get("/staff/cars/verification/stats");
