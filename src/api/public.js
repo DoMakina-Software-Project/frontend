@@ -32,7 +32,9 @@ export const fetchBrands = () => axios.get("/public/brands");
 
 export const fetchHomeCars = () => axios.get("/public/cars/home");
 
-export const getAllBrands = () => axios.get("/public/brands");
+export const getAllBrands = (page = 1) => axios.get("/public/brands", { params: { page } });
+
+export const getAllBrandsSimple = () => axios.get("/public/brands/simple");
 
 export const getWishlistCars = ({ ids }) =>
 	axios.get("/public/cars/wishlist", {

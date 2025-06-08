@@ -1,6 +1,6 @@
 import axios from "./axios";
 
-export const getAllStaff = () => axios.get("/admin/staff");
+export const getAllStaff = (page = 1) => axios.get("/admin/staff", { params: { page } });
 
 export const createStaff = (data) => axios.post("/admin/staff", data);
 

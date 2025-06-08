@@ -4,7 +4,7 @@ import { CarCard } from "../../components/pages/Search";
 import { FiFilter } from "react-icons/fi";
 import { useApi } from "../../hooks";
 import useDebounce from "../../hooks/useDebounce";
-import { searchCars, getAllBrands } from "../../api/public";
+import { searchCars, getAllBrandsSimple } from "../../api/public";
 import { FaCar, FaHome, FaCalendarAlt, FaInfoCircle } from "react-icons/fa";
 import { albanianCities } from "../../data/cities";
 import Select from 'react-select';
@@ -47,7 +47,7 @@ const SearchPage = () => {
 	const [isFilterOpen, setIsFilterOpen] = useState(false);
 
 	const { handleApiCall: getBrandsApiCall, loading: loadingBrands } =
-		useApi(getAllBrands);
+		useApi(getAllBrandsSimple);
 
 	const { handleApiCall: searchCarsApiCall, loading: loadingCars } = useApi(
 		searchCars,

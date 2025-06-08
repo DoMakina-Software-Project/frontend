@@ -1,6 +1,8 @@
 import axios from "./axios";
 
 //Brands
+export const getBrands = (page = 1) => axios.get("/staff/brands", { params: { page } });
+
 export const createBrand = (formData) =>
 	axios.post("/staff/brands", formData, {
 		headers: {
