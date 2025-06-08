@@ -55,12 +55,25 @@ const CarCard = ({ car, removeWishlistCar = () => {} }) => {
 					</div>
 					<span className="font-semibold">
 						{car?.price?.toLocaleString()}$
+						{car?.listingType === "RENT" && (
+							<span className="text-sm text-gray-500">/day</span>
+						)}
 					</span>
 				</div>
 				<div className="flex gap-2">
 					{car?.promoted && (
 						<span className="rounded bg-blue-100 px-2 py-1 text-xs text-blue-600">
 							Promoted
+						</span>
+					)}
+					{car?.listingType === "RENT" && (
+						<span className="rounded bg-green-100 px-2 py-1 text-xs text-green-600">
+							For Rent
+						</span>
+					)}
+					{car?.listingType === "SALE" && (
+						<span className="rounded bg-yellow-100 px-2 py-1 text-xs text-yellow-600">
+							For Sale
 						</span>
 					)}
 				</div>
