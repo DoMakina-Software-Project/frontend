@@ -44,6 +44,63 @@ const Input = ({
 
 	const defaultClassName = `${getDefaultClassName(type)} ${passwordIcon ? "pr-10" : ""} ${errorMessage ? "border border-red-500" : ""}`;
 
+	const handleKeyDown = (e) => {
+		if (type === "number") {
+			// Allow: backspace, delete, tab, escape, enter, decimal point, minus sign (at start)
+			const allowedKeys = [
+				"Backspace",
+				"Delete",
+				"Tab",
+				"Escape",
+				"Enter",
+				".",
+				"-",
+				"ArrowLeft",
+				"ArrowRight",
+				"ArrowUp",
+				"ArrowDown",
+				"Home",
+				"End",
+			];
+
+			// Allow minus sign only at the start of the input
+			if (e.key === "-" && e.target.value !== "") {
+				e.preventDefault();
+				return;
+			}
+
+			// Allow decimal point only if it hasn't been used yet
+			if (e.key === "." && e.target.value.includes(".")) {
+				e.preventDefault();
+				return;
+			}
+
+			// Allow numbers
+			if (/^\d$/.test(e.key)) {
+				return;
+			}
+
+			// Allow special keys
+			if (allowedKeys.includes(e.key)) {
+				return;
+			}
+
+			// Prevent all other input
+			e.preventDefault();
+		}
+	};
+
+	const handlePaste = (e) => {
+		if (type === "number") {
+			// Get pasted data
+			const pastedData = e.clipboardData.getData("text");
+			// Check if pasted data is a valid number
+			if (!/^-?\d*\.?\d*$/.test(pastedData)) {
+				e.preventDefault();
+			}
+		}
+	};
+
 	const onFormChange = (e) => {
 		const { name, value } = e.target;
 
@@ -56,6 +113,14 @@ const Input = ({
 				},
 			}));
 			return;
+		}
+
+		// For number inputs, ensure the value is a valid number
+		if (type === "number" && value !== "") {
+			const numValue = parseFloat(value);
+			if (isNaN(numValue)) {
+				return;
+			}
 		}
 
 		setFormState((prev) => ({
@@ -84,6 +149,9 @@ const Input = ({
 					}
 					type={showPassword ? "text" : type}
 					onChange={onChange || onFormChange}
+					onKeyDown={handleKeyDown}
+					onPaste={handlePaste}
+					inputMode={type === "number" ? "decimal" : "text"}
 				/>
 				{passwordIcon && (
 					<button

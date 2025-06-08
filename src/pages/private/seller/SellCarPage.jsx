@@ -26,6 +26,12 @@ const initialState = {
 	mileage: { value: "", error: "" },
 };
 
+const currentYear = new Date().getFullYear();
+const yearOptions = Array.from(
+	{ length: currentYear - 1989 },
+	(_, i) => currentYear - i
+);
+
 const SellCarPage = () => {
 	const { handleApiCall: createCarApiCall, loading: loadingCreateCar } =
 		useApi(createCar, {
@@ -48,6 +54,7 @@ const SellCarPage = () => {
 
 	const [formState, setFormState] = useState(initialState);
 	const [brands, setBrands] = useState([]);
+	const [filteredBrands, setFilteredBrands] = useState([]);
 	const [activeStep, setActiveStep] = useState(1);
 	const totalSteps = 3;
 
@@ -57,7 +64,7 @@ const SellCarPage = () => {
 	};
 
 	const validateBasicInfo = () => {
-		const { brand, model, year, price } = formState;
+		const { brand, model, year, price, listingType } = formState;
 		let isValid = true;
 		const newState = { ...formState };
 
@@ -65,16 +72,42 @@ const SellCarPage = () => {
 			newState.brand.error = "Brand is required";
 			isValid = false;
 		}
+
 		if (!model.value) {
 			newState.model.error = "Model is required";
 			isValid = false;
+		} else if (model.value.length < 2) {
+			newState.model.error = "Model must be at least 2 characters";
+			isValid = false;
+		} else if (model.value.length > 50) {
+			newState.model.error = "Model must be at most 50 characters";
+			isValid = false;
 		}
+
 		if (!year.value) {
 			newState.year.error = "Year is required";
 			isValid = false;
+		} else {
+			const yearNum = parseInt(year.value);
+			if (isNaN(yearNum) || yearNum < 1990 || yearNum > currentYear) {
+				newState.year.error = `Year must be between 1990 and ${currentYear}`;
+				isValid = false;
+			}
 		}
+
 		if (!price.value) {
 			newState.price.error = "Price is required";
+			isValid = false;
+		} else {
+			const priceNum = parseInt(price.value);
+			if (isNaN(priceNum) || priceNum <= 0) {
+				newState.price.error = "Price must be a positive number";
+				isValid = false;
+			}
+		}
+
+		if (!listingType.value) {
+			newState.listingType.error = "Please select listing type";
 			isValid = false;
 		}
 
@@ -83,7 +116,7 @@ const SellCarPage = () => {
 	};
 
 	const validateCarDetails = () => {
-		const { description, mileage } = formState;
+		const { description, mileage, fuelType, transmission } = formState;
 		let isValid = true;
 		const newState = { ...formState };
 
@@ -91,12 +124,34 @@ const SellCarPage = () => {
 			newState.description.error = "Description is required";
 			isValid = false;
 		} else if (description.value.length < 10) {
-			newState.description.error =
-				"Description must be at least 10 characters";
+			newState.description.error = "Description must be at least 10 characters";
+			isValid = false;
+		} else if (description.value.length > 500) {
+			newState.description.error = "Description must be at most 500 characters";
 			isValid = false;
 		}
+
 		if (!mileage.value) {
 			newState.mileage.error = "Mileage is required";
+			isValid = false;
+		} else {
+			const mileageNum = parseInt(mileage.value);
+			if (isNaN(mileageNum) || mileageNum < 0) {
+				newState.mileage.error = "Mileage must be a positive number";
+				isValid = false;
+			} else if (mileageNum > 1000000) {
+				newState.mileage.error = "Mileage cannot exceed 1,000,000 km";
+				isValid = false;
+			}
+		}
+
+		if (!fuelType.value) {
+			newState.fuelType.error = "Fuel type is required";
+			isValid = false;
+		}
+
+		if (!transmission.value) {
+			newState.transmission.error = "Transmission type is required";
 			isValid = false;
 		}
 
@@ -109,8 +164,23 @@ const SellCarPage = () => {
 		let isValid = true;
 		const newState = { ...formState };
 
-		if (photos.value.length === 0) {
+		if (!photos.value || photos.value.length === 0) {
 			newState.photos.error = "At least one photo is required";
+			isValid = false;
+		} else if (photos.value.length > 10) {
+			newState.photos.error = "Maximum 10 photos allowed";
+			isValid = false;
+		}
+
+		// Check file types and sizes
+		const invalidFiles = photos.value.filter(file => {
+			const isValidType = ['image/jpeg', 'image/png', 'image/webp'].includes(file.type);
+			const isValidSize = file.size <= 5 * 1024 * 1024; // 5MB
+			return !isValidType || !isValidSize;
+		});
+
+		if (invalidFiles.length > 0) {
+			newState.photos.error = "All photos must be JPG, PNG, or WebP and under 5MB";
 			isValid = false;
 		}
 
@@ -185,9 +255,21 @@ const SellCarPage = () => {
 		setActiveStep(activeStep - 1);
 	};
 
+	const handleBrandSearch = (searchTerm) => {
+		if (!searchTerm) {
+			setFilteredBrands(brands);
+			return;
+		}
+		const filtered = brands.filter((brand) =>
+			brand.name.toLowerCase().includes(searchTerm.toLowerCase())
+		);
+		setFilteredBrands(filtered);
+	};
+
 	useEffect(() => {
 		getBrandsApiCall().then((data) => {
 			setBrands(data);
+			setFilteredBrands(data);
 		});
 	}, []);
 
@@ -215,7 +297,10 @@ const SellCarPage = () => {
 							<BasicInfo
 								formState={formState}
 								setFormState={setFormState}
-								brands={brands}
+								brands={filteredBrands}
+								yearOptions={yearOptions}
+								onBrandSearch={handleBrandSearch}
+								currentYear={currentYear}
 							/>
 						)}
 						{activeStep === 2 && (
