@@ -1,4 +1,4 @@
-import { useApi } from "../../../hooks";
+import { useApi, useConfirmation } from "../../../hooks";
 import { CarCardDash } from ".";
 import { useState, useEffect } from "react";
 import {
@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function GridDashboardCar() {
 	const navigate = useNavigate();
+	const { showConfirmation } = useConfirmation();
 	const [cars, setCars] = useState([]);
 
 	const { handleApiCall: deletePromotionApiCall } = useApi(deletePromotion, {
@@ -28,38 +29,67 @@ export default function GridDashboardCar() {
 	});
 
 	const handleDeleteCar = (id) => {
-		deleteCarApiCall({ id }).then(() => {
-			setCars((prev) => prev.filter((car) => car.id !== id));
+		const car = cars.find((c) => c.id === id);
+		showConfirmation({
+			title: "Delete Car",
+			message: `Are you sure you want to delete "${car?.brand} ${car?.model} (${car?.year})"? This action cannot be undone and will remove all associated bookings and data.`,
+			confirmText: "Yes, Delete",
+			cancelText: "Cancel",
+			onConfirm: () => {
+				deleteCarApiCall({ id }).then(() => {
+					setCars((prev) => prev.filter((car) => car.id !== id));
+				});
+			},
 		});
 	};
 
 	const handleIsSold = (id, carIsSold) => {
 		const isSold = !carIsSold;
+		const car = cars.find((c) => c.id === id);
 
-		updateIsSoldApiCall({ id, isSold }).then((data) => {
-			if (data)
-				setCars((prev) =>
-					prev.map((car) => {
-						if (car.id === id) {
-							return { ...car, isSold };
-						}
-						return car;
-					}),
-				);
+		const action = isSold ? "mark as sold" : "mark as available";
+
+		showConfirmation({
+			title: isSold ? "Mark Car as Sold" : "Mark Car as Available",
+			message: `Are you sure you want to ${action} "${car?.brand} ${car?.model} (${car?.year})"?`,
+			confirmText: `Yes, ${isSold ? "Mark as Sold" : "Mark as Available"}`,
+			cancelText: "Cancel",
+			onConfirm: () => {
+				updateIsSoldApiCall({ id, isSold }).then((data) => {
+					if (data)
+						setCars((prev) =>
+							prev.map((car) => {
+								if (car.id === id) {
+									return { ...car, isSold };
+								}
+								return car;
+							}),
+						);
+				});
+			},
 		});
 	};
 
 	const handlePromote = (id, promoted) => {
 		if (promoted) {
-			deletePromotionApiCall({ id }).then((data) => {
-				if (data)
-					setCars((prev) =>
-						prev.map((car) =>
-							car.id === id
-								? { ...car, promoted: !car.promoted }
-								: car,
-						),
-					);
+			const car = cars.find((c) => c.id === id);
+			showConfirmation({
+				title: "Remove Promotion",
+				message: `Are you sure you want to remove the promotion for "${car?.brand} ${car?.model} (${car?.year})"?`,
+				confirmText: "Yes, Remove",
+				cancelText: "Cancel",
+				onConfirm: () => {
+					deletePromotionApiCall({ id }).then((data) => {
+						if (data)
+							setCars((prev) =>
+								prev.map((car) =>
+									car.id === id
+										? { ...car, promoted: !car.promoted }
+										: car,
+								),
+							);
+					});
+				},
 			});
 		} else {
 			navigate(`/seller/promotion/${id}`);

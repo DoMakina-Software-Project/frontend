@@ -9,8 +9,10 @@ import {
 	sellerCompleteBooking,
 	getSellerBookingStats,
 	updatePaymentStatus,
+	refundBooking,
 } from "../../../api/booking";
 import { useApi } from "../../../hooks";
+import { useConfirmation } from "../../../hooks";
 import {
 	FaCar,
 	FaCalendarAlt,
@@ -45,6 +47,7 @@ const statusIcons = {
 
 const BookingManagementPage = () => {
 	const navigate = useNavigate();
+	const { showConfirmation } = useConfirmation();
 	const [bookings, setBookings] = useState([]);
 	const [stats, setStats] = useState(null);
 	const [selectedStatus, setSelectedStatus] = useState("");
@@ -82,6 +85,13 @@ const BookingManagementPage = () => {
 			successMessage: "Payment marked as received!",
 		},
 	);
+	const { handleApiCall: refundApiCall, loading: loadingRefund } = useApi(
+		refundBooking,
+		{
+			disableSuccessToast: false,
+			successMessage: "Booking refunded successfully!",
+		},
+	);
 
 	useEffect(() => {
 		fetchBookings();
@@ -103,38 +113,107 @@ const BookingManagementPage = () => {
 	};
 
 	const handleConfirmBooking = async (bookingId) => {
-		const data = await confirmBookingApiCall(bookingId);
-		if (data) {
-			fetchBookings();
-		}
+		showConfirmation({
+			title: "Confirm Booking",
+			message:
+				"Are you sure you want to confirm this booking? The client will be notified.",
+			confirmText: "Yes, Confirm",
+			cancelText: "Not Yet",
+			onConfirm: async () => {
+				const data = await confirmBookingApiCall(bookingId);
+				if (data) {
+					fetchBookings();
+					fetchStats();
+				}
+			},
+		});
 	};
 
 	const handleRejectBooking = async (bookingId) => {
-		const data = await rejectBookingApiCall(bookingId);
-		if (data) {
-			fetchBookings();
-		}
+		showConfirmation({
+			title: "Reject Booking",
+			message:
+				"Are you sure you want to reject this booking? This action cannot be undone.",
+			confirmText: "Yes, Reject",
+			cancelText: "Keep Booking",
+			onConfirm: async () => {
+				const data = await rejectBookingApiCall(bookingId);
+				if (data) {
+					fetchBookings();
+					fetchStats();
+				}
+			},
+		});
 	};
 
 	const handleCancelBooking = async (bookingId) => {
-		const data = await cancelBookingApiCall(bookingId);
-		if (data) {
-			fetchBookings();
-		}
+		showConfirmation({
+			title: "Cancel Booking",
+			message:
+				"Are you sure you want to cancel this booking? This action cannot be undone.",
+			confirmText: "Yes, Cancel",
+			cancelText: "Keep Booking",
+			onConfirm: async () => {
+				const data = await cancelBookingApiCall(bookingId);
+				if (data) {
+					fetchBookings();
+					fetchStats();
+				}
+			},
+		});
 	};
 
 	const handleCompleteBooking = async (bookingId) => {
-		const data = await completeBookingApiCall(bookingId);
-		if (data) {
-			fetchBookings();
-		}
+		showConfirmation({
+			title: "Complete Booking",
+			message: "Are you sure you want to mark this booking as completed?",
+			confirmText: "Yes, Complete",
+			cancelText: "Not Yet",
+			onConfirm: async () => {
+				const data = await completeBookingApiCall(bookingId);
+				if (data) {
+					fetchBookings();
+					fetchStats();
+				}
+			},
+		});
 	};
 
 	const handleCashIn = async (bookingId) => {
-		const data = await cashInApiCall({ bookingId, paymentStatus: "PAID" });
-		if (data) {
-			fetchBookings();
-		}
+		showConfirmation({
+			title: "Mark Payment as Received",
+			message:
+				"Are you sure you have received the cash payment for this booking? This action will mark the payment as completed.",
+			confirmText: "Yes, Received",
+			cancelText: "Not Yet",
+			onConfirm: async () => {
+				const data = await cashInApiCall({
+					bookingId,
+					paymentStatus: "PAID",
+				});
+				if (data) {
+					fetchBookings();
+					fetchStats();
+				}
+			},
+		});
+	};
+
+	const handleRefund = async (bookingId) => {
+		showConfirmation({
+			title: "Refund Booking",
+			message:
+				"Are you sure you want to refund this booking? This will mark the payment as refunded.",
+			confirmText: "Yes, Refund",
+			cancelText: "Cancel",
+			onConfirm: async () => {
+				const data = await refundApiCall(bookingId);
+				if (data) {
+					fetchBookings();
+					fetchStats();
+				}
+			},
+		});
 	};
 
 	const formatDate = (dateString) => {
@@ -160,7 +239,8 @@ const BookingManagementPage = () => {
 			loadingReject ||
 			loadingCancel ||
 			loadingComplete ||
-			loadingCashIn;
+			loadingCashIn ||
+			loadingRefund;
 
 		switch (booking.status) {
 			case "PENDING":
@@ -220,6 +300,24 @@ const BookingManagementPage = () => {
 						</Button>
 					</div>
 				);
+			case "CANCELLED":
+				return (
+					<div className="flex gap-2">
+						{booking.paymentStatus === "PAID" && (
+							<Button
+								onClick={() => handleRefund(booking.id)}
+								disabled={isProcessing}
+								className="bg-orange-600 px-3 py-1 text-sm text-white hover:bg-orange-700"
+							>
+								<FaMoneyBillWave className="mr-1" />
+								Refund
+							</Button>
+						)}
+						<span className="text-sm text-gray-500">
+							Booking cancelled
+						</span>
+					</div>
+				);
 			default:
 				return (
 					<span className="text-sm text-gray-500">
@@ -248,7 +346,7 @@ const BookingManagementPage = () => {
 		if (!stats) return null;
 
 		return (
-			<div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-4">
+			<div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-5">
 				<div className="rounded-lg border border-gray-200 bg-white p-4">
 					<div className="flex items-center gap-3">
 						<FaChartBar className="text-2xl text-theme-blue" />

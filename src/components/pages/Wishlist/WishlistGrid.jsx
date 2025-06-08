@@ -1,21 +1,36 @@
 import { CarCard } from "../Search";
 import { useState, useEffect } from "react";
 import { getUserWishlist, removeFromWishlist } from "../../../api/client";
-import { useApi } from "../../../hooks";
+import { useApi, useConfirmation } from "../../../hooks";
 
 export default function WishlistGrid() {
+	const { showConfirmation } = useConfirmation();
+
 	const [cars, setCars] = useState([]);
 	const [hasNextPage, setHasNextPage] = useState(false);
 	const [page, setPage] = useState(1);
 	const [totalItems, setTotalItems] = useState(0);
 
-	const { handleApiCall: getUserWishlistApiCall, loading } = useApi(getUserWishlist);
-	const { handleApiCall: removeFromWishlistApiCall } = useApi(removeFromWishlist);
+	const { handleApiCall: getUserWishlistApiCall, loading } =
+		useApi(getUserWishlist);
+	const { handleApiCall: removeFromWishlistApiCall } =
+		useApi(removeFromWishlist);
 
 	const removeWishlistCar = (carId) => {
-		removeFromWishlistApiCall(carId).then(() => {
-			setCars((prevCars) => prevCars.filter((car) => car.Car.id !== carId));
-			setTotalItems((prev) => prev - 1);
+		const car = cars.find((c) => c.id === carId);
+
+		showConfirmation({
+			title: "Remove from Wishlist",
+			message: `Are you sure you want to remove "${car?.Brand?.name} ${car?.model} (${car?.year})" from your wishlist?`,
+			confirmText: "Yes, Remove",
+			cancelText: "Cancel",
+			onConfirm: async () => {
+				await removeFromWishlistApiCall(carId);
+				setCars((prevCars) =>
+					prevCars.filter((car) => car.id !== carId),
+				);
+				setTotalItems((prev) => prev - 1);
+			},
 		});
 	};
 
@@ -55,7 +70,9 @@ export default function WishlistGrid() {
 				<div className="flex w-full max-w-7xl flex-col items-center justify-center">
 					<div className="text-center">
 						<div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-4 border-theme-blue border-t-transparent"></div>
-						<p className="text-gray-600">Loading your wishlist...</p>
+						<p className="text-gray-600">
+							Loading your wishlist...
+						</p>
 					</div>
 				</div>
 			</div>
@@ -78,7 +95,8 @@ export default function WishlistGrid() {
 					<div className="text-sm text-gray-600">
 						{totalItems > 0 && (
 							<span>
-								Showing {cars.length} of {totalItems} items in your wishlist
+								Showing {cars.length} of {totalItems} items in
+								your wishlist
 							</span>
 						)}
 					</div>

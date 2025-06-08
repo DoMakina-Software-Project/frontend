@@ -18,7 +18,6 @@ import {
 	FaHeart,
 	FaEye,
 } from "react-icons/fa";
-import toast from "react-hot-toast";
 
 const ClientDashboardPage = () => {
 	const navigate = useNavigate();
