@@ -1,30 +1,47 @@
 import { useState, useEffect } from "react";
 import { BsBookmarkDash, BsBookmarkDashFill } from "react-icons/bs";
-import { LocalStorageUtils } from "../../../utils";
 import CarExampleImage from "../../../assets/images/car-example.png";
 import { useNavigate } from "react-router-dom";
+import { addToWishlist, removeFromWishlist, isCarInWishlist } from "../../../api/client";
+import { useApi } from "../../../hooks";
 
 const CarCard = ({ car, removeWishlistCar = () => {} }) => {
 	const navigate = useNavigate();
 
 	const [isInWishlist, setIsInWishlist] = useState(false);
 
+	const { handleApiCall: addToWishlistApiCall } = useApi(addToWishlist);
+	const { handleApiCall: removeFromWishlistApiCall } = useApi(removeFromWishlist);
+	const { handleApiCall: isCarInWishlistApiCall } = useApi(isCarInWishlist);
+
 	useEffect(() => {
-		const wishlist = LocalStorageUtils.getItem("wishlist") || [];
-		setIsInWishlist(wishlist.includes(car?.id));
+		if (car?.id) {
+			isCarInWishlistApiCall(car.id).then((data) => {
+				if (data) {
+					setIsInWishlist(data.isInWishlist);
+				}
+			}).catch(() => {
+				// If user is not authenticated, default to false
+				setIsInWishlist(false);
+			});
+		}
 	}, [car?.id]);
 
 	const toggleFavorite = () => {
-		const wishlist = LocalStorageUtils.getItem("wishlist") || [];
-		let newWishlist;
 		if (isInWishlist) {
-			newWishlist = wishlist.filter((id) => id !== car.id);
-			removeWishlistCar(car.id);
+			removeFromWishlistApiCall(car.id).then(() => {
+				setIsInWishlist(false);
+				removeWishlistCar(car.id);
+			}).catch(() => {
+				// Handle error - maybe show a toast
+			});
 		} else {
-			newWishlist = [...wishlist, car.id];
+			addToWishlistApiCall(car.id).then(() => {
+				setIsInWishlist(true);
+			}).catch(() => {
+				// Handle error - maybe show a toast or redirect to login
+			});
 		}
-		LocalStorageUtils.setItem("wishlist", newWishlist);
-		setIsInWishlist(!isInWishlist);
 	};
 
 	return (
