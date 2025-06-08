@@ -15,27 +15,11 @@ export default function CarGrid() {
 		});
 	}, []);
 
-	if (loading) {
-		return (
-			<div className="flex w-full items-center justify-center px-6 lg:px-14">
-				<div className="flex w-full max-w-7xl flex-col items-center justify-center">
-					<h2 className="text-center text-2xl font-semibold text-gray-700">
-						Loading cars...
-					</h2>
-				</div>
-			</div>
-		);
+	if (loading || cars.length === 0) {
+		return null;
 	}
 
-	return cars.length === 0 ? (
-		<div className="flex w-full items-center justify-center px-6 lg:px-14">
-			<div className="flex w-full max-w-7xl flex-col items-center justify-center">
-				<h2 className="text-center text-2xl font-semibold text-gray-700">
-					No cars found. Please try again later.
-				</h2>
-			</div>
-		</div>
-	) : (
+	return (
 		<div className="flex w-full items-center justify-center px-6 lg:px-14">
 			<div className="flex w-full max-w-7xl flex-col items-center justify-center">
 				{/* Advanced Search Button */}

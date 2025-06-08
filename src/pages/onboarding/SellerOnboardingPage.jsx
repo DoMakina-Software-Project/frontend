@@ -5,6 +5,93 @@ import { createSellerProfile } from "../../api/seller";
 import { Button, Input } from "../../components/ui";
 import { clearErrors } from "../../utils/form";
 import { useNavigate } from "react-router-dom";
+import Select from "react-select";
+
+const ALLOWED_CITIES = [
+	"Bajram Curri",
+	"Bajze",
+	"Ballsh",
+	"Berat",
+	"Bilisht",
+	"Bulqize",
+	"Burrel",
+	"Cerrik",
+	"Corovode",
+	"Delvine",
+	"Divjake",
+	"Durres",
+	"Elbasan",
+	"Erseke",
+	"Fier",
+	"Fierze",
+	"Finiq",
+	"Fushe-Arrez",
+	"Fushe-Kruje",
+	"Gjirokaster",
+	"Gramsh",
+	"Himare",
+	"Kamez",
+	"Kavaje",
+	"Kelcyre",
+	"Klos",
+	"Konispol",
+	"Koplik",
+	"Korce",
+	"Kraste",
+	"Krrabe",
+	"Kruje",
+	"Krume",
+	"Ksamil",
+	"Kucove",
+	"Kukes",
+	"Kurbnesh",
+	"Lac",
+	"Leskovik",
+	"Lezhe",
+	"Libohove",
+	"Librazhd",
+	"Lushnje",
+	"Maliq",
+	"Mamurras",
+	"Manez",
+	"Memaliaj",
+	"Milot",
+	"Orikum",
+	"Patos",
+	"Peqin",
+	"Permet",
+	"Peshkopi",
+	"Pogradec",
+	"Polican",
+	"Prrenjas",
+	"Puke",
+	"Reps",
+	"Roskovec",
+	"Rreshen",
+	"Rrogozhine",
+	"Rubik",
+	"Sarande",
+	"Selenice",
+	"Shengjin",
+	"Shijak",
+	"Shkoder",
+	"Sukth",
+	"Tepelene",
+	"Theth",
+	"Tirana",
+	"Ulez",
+	"Ura Vajgurore",
+	"Vau i Dejes",
+	"Vithkuq",
+	"Vlore",
+	"Vore",
+];
+
+const cityOptions = ALLOWED_CITIES.map((city) => ({
+	value: city,
+	label: city,
+}));
+const countryOptions = [{ value: "Albania", label: "Albania" }];
 
 const initialState = {
 	isBusiness: {
@@ -134,22 +221,55 @@ const SellerOnboardingPage = () => {
 					>
 						<h1 className="text-[26px]">Create a Seller Profile</h1>
 						<div className="flex w-full flex-col space-y-1.5">
-							<Input
-								type="text"
-								placeholder="Country"
-								name="country"
-								formState={formState}
-								setFormState={setFormState}
-								required
+							<Select
+								placeholder="Country (available only for Albania)"
+								options={countryOptions}
+								value={countryOptions.find(
+									(option) =>
+										option.value ===
+										formState.country.value,
+								)}
+								onChange={(selectedOption) => {
+									setFormState((prev) => ({
+										...prev,
+										country: {
+											...prev.country,
+											value: selectedOption?.value || "",
+											error: "",
+										},
+									}));
+								}}
+								className="w-full"
 							/>
-							<Input
-								type="text"
+							{formState.country.error && (
+								<span className="text-xs text-red-500">
+									{formState.country.error}
+								</span>
+							)}
+							<Select
 								placeholder="City"
-								name="city"
-								formState={formState}
-								setFormState={setFormState}
-								required
+								options={cityOptions}
+								value={cityOptions.find(
+									(option) =>
+										option.value === formState.city.value,
+								)}
+								onChange={(selectedOption) => {
+									setFormState((prev) => ({
+										...prev,
+										city: {
+											...prev.city,
+											value: selectedOption?.value || "",
+											error: "",
+										},
+									}));
+								}}
+								className="w-full"
 							/>
+							{formState.city.error && (
+								<span className="text-xs text-red-500">
+									{formState.city.error}
+								</span>
+							)}
 							<Input
 								type="text"
 								placeholder="Contact Phone"

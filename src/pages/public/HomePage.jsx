@@ -3,7 +3,6 @@ import {
 	FeatureSection,
 	Hero,
 	CarGrid,
-	Testimonials,
 	Services,
 } from "../../components/pages/Home";
 const HomePage = () => {
@@ -18,7 +17,6 @@ const HomePage = () => {
 				<Services />
 				<FeatureSection />
 				<CarGrid />
-				<Testimonials />
 			</div>
 		</MainLayout>
 	);

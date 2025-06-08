@@ -13,9 +13,21 @@ export default function CarDetailsCard({ data }) {
 						{data?.brand} {data?.model}
 					</h3>
 				</div>
-				<span className="rounded bg-white px-2 py-1 text-xs font-bold text-green-700">
-					Promoted
-				</span>
+				<div className="flex gap-2">
+					<span className="rounded bg-white px-2 py-1 text-xs font-bold text-green-700">
+						Promoted
+					</span>
+					{data?.listingType === "RENT" && (
+						<span className="rounded bg-white px-2 py-1 text-xs font-bold text-green-700">
+							For Rent
+						</span>
+					)}
+					{data?.listingType === "SALE" && (
+						<span className="rounded bg-white px-2 py-1 text-xs font-bold text-yellow-600">
+							For Sale
+						</span>
+					)}
+				</div>
 			</div>
 
 			<div className="mb-4 h-52">
@@ -32,6 +44,9 @@ export default function CarDetailsCard({ data }) {
 				</button>
 				<span className="text-xl font-bold text-white">
 					${data?.price?.toLocaleString() || "N/A"}{" "}
+					{data?.listingType === "RENT" && (
+						<span className="text-sm text-gray-300">/day</span>
+					)}
 				</span>
 			</div>
 

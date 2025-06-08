@@ -14,7 +14,7 @@ export default function HeroSection() {
 	const [promotedCars, setPromotedCars] = useState([]);
 
 	useEffect(() => {
-		handleApiCall().then((data) => setPromotedCars(data));
+		handleApiCall().then((data) => setPromotedCars(data || []));
 	}, []);
 
 	const handleLeftClick = () => {
@@ -72,7 +72,7 @@ export default function HeroSection() {
 				</div>
 
 				{/* Right Content */}
-				{promotedCars.length > 0 && (
+				{promotedCars?.length > 0 && (
 					<div className="max-w-sm">
 						<CarDetailsCard data={promotedCars[index]} />
 						{promotedCars.length > 1 && (
@@ -85,17 +85,17 @@ export default function HeroSection() {
 								</span>
 
 								<div className="flex gap-2">
-									<button className="rounded-lg bg-gray-800 p-2 transition-all duration-150 hover:scale-110">
-										<FaChevronLeft
-											className="h-6 w-6 text-white"
-											onClick={handleLeftClick}
-										/>
+									<button
+										onClick={handleLeftClick}
+										className="rounded-lg bg-gray-800 p-2 transition-all duration-150 hover:scale-110"
+									>
+										<FaChevronLeft className="h-6 w-6 text-white" />
 									</button>
-									<button className="rounded-lg bg-gray-800 p-2 transition-all duration-150 hover:scale-110">
-										<FaChevronRight
-											className="h-6 w-6 text-white"
-											onClick={handleRightClick}
-										/>
+									<button
+										onClick={handleRightClick}
+										className="rounded-lg bg-gray-800 p-2 transition-all duration-150 hover:scale-110"
+									>
+										<FaChevronRight className="h-6 w-6 text-white" />
 									</button>
 								</div>
 							</div>
