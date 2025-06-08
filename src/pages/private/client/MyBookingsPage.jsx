@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { MainLayout } from "../../../components/layouts";
 import { Button, Modal } from "../../../components/ui";
@@ -7,6 +7,7 @@ import {
 	getBookingById,
 	cancelBooking,
 } from "../../../api/booking";
+import { createReview, canReviewBooking } from "../../../api/review";
 import { useApi, useConfirmation } from "../../../hooks";
 import {
 	FaCalendarAlt,
@@ -19,7 +20,124 @@ import {
 	FaArrowLeft,
 	FaUser,
 	FaEnvelope,
+	FaStar,
 } from "react-icons/fa";
+
+const StarRating = memo(({ rating, onRatingChange }) => {
+	return (
+		<div className="flex items-center gap-1">
+			{[1, 2, 3, 4, 5].map((star) => (
+				<button
+					key={star}
+					type="button"
+					onClick={() => onRatingChange(star)}
+					className="focus:outline-none"
+				>
+					<FaStar
+						className={`text-2xl ${
+							star <= rating
+								? "text-yellow-400"
+								: "text-gray-300"
+						}`}
+					/>
+				</button>
+			))}
+		</div>
+	);
+});
+
+const ReviewModal = memo(({ isOpen, onClose, booking, onReviewSubmitted }) => {
+	const [rating, setRating] = useState(5);
+	const [comment, setComment] = useState("");
+	const { handleApiCall: createReviewApiCall, loading: loadingReview } =
+		useApi(createReview, {
+			disableSuccessToast: false,
+			successMessage: "Review submitted successfully",
+		});
+
+	const handleSubmit = async () => {
+		if (booking && rating && comment.trim()) {
+			const data = await createReviewApiCall({
+				carId: booking.Car.id,
+				bookingId: booking.id,
+				rating,
+				comment: comment.trim(),
+			});
+
+			if (data) {
+				setRating(5);
+				setComment("");
+				onClose();
+				onReviewSubmitted?.();
+			}
+		}
+	};
+
+	return (
+		<Modal
+			isOpen={isOpen}
+			onClose={onClose}
+			title="Write a Review"
+			size="small"
+		>
+			<div className="space-y-6">
+				<div className="text-center">
+					<h4 className="mb-2 text-lg font-semibold">
+						{booking?.Car.Brand?.name} {booking?.Car.model}
+					</h4>
+					<p className="text-sm text-gray-600">
+						How was your experience with this car?
+					</p>
+				</div>
+
+				<div className="flex justify-center">
+					<StarRating rating={rating} onRatingChange={setRating} />
+				</div>
+
+				<div>
+					<label
+						htmlFor="comment"
+						className="mb-2 block text-sm font-medium text-gray-700"
+					>
+						Your Review
+					</label>
+					<textarea
+						id="comment"
+						rows={4}
+						value={comment}
+						onChange={(e) => setComment(e.target.value)}
+						placeholder="Share your experience with this car..."
+						className="w-full rounded-lg border border-gray-300 p-2 text-sm focus:border-theme-blue focus:outline-none"
+					/>
+				</div>
+
+				<div className="flex gap-3">
+					<Button
+						variant="primary"
+						onClick={handleSubmit}
+						disabled={
+							loadingReview ||
+							!comment.trim() ||
+							!rating
+						}
+						className="flex-1"
+					>
+						{loadingReview
+							? "Submitting..."
+							: "Submit Review"}
+					</Button>
+					<Button
+						variant="outline"
+						onClick={onClose}
+						className="flex-1"
+					>
+						Cancel
+					</Button>
+				</div>
+			</div>
+		</Modal>
+	);
+});
 
 const MyBookingsPage = () => {
 	const navigate = useNavigate();
@@ -29,8 +147,10 @@ const MyBookingsPage = () => {
 	const [filteredBookings, setFilteredBookings] = useState([]);
 	const [selectedBooking, setSelectedBooking] = useState(null);
 	const [showBookingModal, setShowBookingModal] = useState(false);
+	const [showReviewModal, setShowReviewModal] = useState(false);
+	const [canReview, setCanReview] = useState(false);
 	const [statusFilter, setStatusFilter] = useState(
-		searchParams.get("status") || "all",
+		searchParams.get("status") || "all"
 	);
 
 	// API hooks
@@ -44,6 +164,8 @@ const MyBookingsPage = () => {
 			disableSuccessToast: false,
 			successMessage: "Booking cancelled successfully",
 		});
+
+	const { handleApiCall: canReviewBookingApiCall } = useApi(canReviewBooking);
 
 	useEffect(() => {
 		fetchBookings();
@@ -67,29 +189,29 @@ const MyBookingsPage = () => {
 		switch (filter) {
 			case "active":
 				filtered = allBookings.filter((booking) =>
-					["PENDING", "CONFIRMED"].includes(booking.status),
+					["PENDING", "CONFIRMED"].includes(booking.status)
 				);
 				break;
 			case "completed":
 				filtered = allBookings.filter(
-					(booking) => booking.status === "COMPLETED",
+					(booking) => booking.status === "COMPLETED"
 				);
 				break;
 			case "cancelled":
 				filtered = allBookings.filter(
 					(booking) =>
 						booking.status === "CANCELLED" ||
-						booking.status === "REJECTED",
+						booking.status === "REJECTED"
 				);
 				break;
 			case "pending":
 				filtered = allBookings.filter(
-					(booking) => booking.status === "PENDING",
+					(booking) => booking.status === "PENDING"
 				);
 				break;
 			case "confirmed":
 				filtered = allBookings.filter(
-					(booking) => booking.status === "CONFIRMED",
+					(booking) => booking.status === "CONFIRMED"
 				);
 				break;
 			default:
@@ -114,6 +236,12 @@ const MyBookingsPage = () => {
 		if (data) {
 			setSelectedBooking(data);
 			setShowBookingModal(true);
+
+			// Check if user can review this booking
+			if (data.status === "COMPLETED") {
+				const canReviewData = await canReviewBookingApiCall(bookingId);
+				setCanReview(canReviewData?.canReview || false);
+			}
 		}
 	};
 
@@ -195,7 +323,7 @@ const MyBookingsPage = () => {
 			>
 				<FaEye className="mr-1" size={12} />
 				View
-			</Button>,
+			</Button>
 		);
 
 		if (booking.status === "PENDING") {
@@ -204,11 +332,14 @@ const MyBookingsPage = () => {
 					key="cancel"
 					size="small"
 					variant="danger"
-					onClick={() => handleViewBooking(booking.id)}
+					onClick={() => {
+						setSelectedBooking(booking);
+						handleCancelBooking();
+					}}
 					className="flex-1"
 				>
 					Cancel
-				</Button>,
+				</Button>
 			);
 		}
 
@@ -247,7 +378,7 @@ const MyBookingsPage = () => {
 						{getStatusIcon(booking.status)}
 						<span
 							className={`rounded-full border px-3 py-1 text-sm font-medium ${getStatusColor(
-								booking.status,
+								booking.status
 							)}`}
 						>
 							{booking.status}
@@ -255,7 +386,7 @@ const MyBookingsPage = () => {
 					</div>
 					<span
 						className={`rounded-full border px-3 py-1 text-sm font-medium ${getPaymentStatusColor(
-							booking.paymentStatus,
+							booking.paymentStatus
 						)}`}
 					>
 						{booking.paymentStatus}
@@ -373,7 +504,7 @@ const MyBookingsPage = () => {
 									{getStatusIcon(selectedBooking.status)}
 									<span
 										className={`rounded-full border px-2 py-1 text-sm font-medium ${getStatusColor(
-											selectedBooking.status,
+											selectedBooking.status
 										)}`}
 									>
 										{selectedBooking.status}
@@ -386,7 +517,7 @@ const MyBookingsPage = () => {
 								</p>
 								<p className="font-medium">
 									{new Date(
-										selectedBooking.startDate,
+										selectedBooking.startDate
 									).toLocaleDateString()}
 								</p>
 							</div>
@@ -396,7 +527,7 @@ const MyBookingsPage = () => {
 								</p>
 								<p className="font-medium">
 									{new Date(
-										selectedBooking.endDate,
+										selectedBooking.endDate
 									).toLocaleDateString()}
 								</p>
 							</div>
@@ -422,7 +553,7 @@ const MyBookingsPage = () => {
 								</p>
 								<span
 									className={`rounded-full border px-2 py-1 text-sm font-medium ${getPaymentStatusColor(
-										selectedBooking.paymentStatus,
+										selectedBooking.paymentStatus
 									)}`}
 								>
 									{selectedBooking.paymentStatus}
@@ -434,7 +565,7 @@ const MyBookingsPage = () => {
 								</p>
 								<p className="font-medium">
 									{new Date(
-										selectedBooking.createdAt,
+										selectedBooking.createdAt
 									).toLocaleDateString()}
 								</p>
 							</div>
@@ -453,6 +584,19 @@ const MyBookingsPage = () => {
 								{loadingCancel
 									? "Cancelling..."
 									: "Cancel Booking"}
+							</Button>
+						)}
+						{canReview && (
+							<Button
+								variant="primary"
+								onClick={() => {
+									setShowBookingModal(false);
+									setShowReviewModal(true);
+								}}
+								className="flex-1"
+							>
+								<FaStar className="mr-2" />
+								Leave a Review
 							</Button>
 						)}
 						<Button
@@ -555,6 +699,17 @@ const MyBookingsPage = () => {
 
 			{/* Booking Details Modal */}
 			<BookingModal />
+
+			{/* Review Modal */}
+			<ReviewModal
+				isOpen={showReviewModal}
+				onClose={() => setShowReviewModal(false)}
+				booking={selectedBooking}
+				onReviewSubmitted={() => {
+					setCanReview(false);
+					fetchBookings();
+				}}
+			/>
 		</MainLayout>
 	);
 };

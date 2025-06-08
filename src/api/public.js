@@ -42,3 +42,6 @@ export const getWishlistCars = ({ ids }) =>
 	});
 
 export const getPromotionPrice = () => axios.get(`/public/promotion-price`);
+
+// Re-export review functions
+export { getCarReviews, getCarRating } from "./review";
