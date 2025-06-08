@@ -1,6 +1,6 @@
 import { Button } from "../../ui";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../../../hooks";
+import { useAuth, useConfirmation } from "../../../hooks";
 import { Logo } from "../../common";
 import { BsBookmarkDashFill } from "react-icons/bs";
 import { useState } from "react";
@@ -8,8 +8,22 @@ import { CiUser } from "react-icons/ci";
 
 const Header = () => {
 	const { currentUser, logout, selectedRole } = useAuth();
+	const { showConfirmation } = useConfirmation();
 	const navigate = useNavigate();
 	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+	const handleLogout = () => {
+		showConfirmation({
+			title: "Logout",
+			message:
+				"Are you sure you want to logout? Any unsaved changes will be lost.",
+			confirmText: "Yes, Logout",
+			cancelText: "Cancel",
+			onConfirm: () => {
+				logout();
+			},
+		});
+	};
 
 	const menu = [
 		{
@@ -56,9 +70,7 @@ const Header = () => {
 		},
 		{
 			title: "Log out",
-			onClick: () => {
-				logout();
-			},
+			onClick: handleLogout,
 			roles: ["CLIENT", "SELLER", "STAFF", "SUPERADMIN"],
 		},
 	];
