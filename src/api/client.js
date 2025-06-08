@@ -1,7 +1,8 @@
 import axios from "./axios";
 
 // Wishlist operations
-export const getUserWishlist = () => axios.get("/client/wishlist");
+export const getUserWishlist = (page = 1) => 
+	axios.get("/client/wishlist", { params: { page } });
 
 export const addToWishlist = (carId) => 
 	axios.post("/client/wishlist", { carId });
