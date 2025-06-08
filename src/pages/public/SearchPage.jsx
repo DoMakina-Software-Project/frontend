@@ -3,25 +3,47 @@ import { MainLayout } from "../../components/layouts";
 import { CarCard } from "../../components/pages/Search";
 import { FiFilter } from "react-icons/fi";
 import { useApi } from "../../hooks";
+import useDebounce from "../../hooks/useDebounce";
 import { searchCars, getAllBrands } from "../../api/public";
 import { FaCar, FaHome, FaCalendarAlt, FaInfoCircle } from "react-icons/fa";
+import { albanianCities } from "../../data/cities";
+import Select from 'react-select';
 import toast from "react-hot-toast";
+
+const currentYear = new Date().getFullYear();
+const yearRange = Array.from({ length: currentYear - 1989 }, (_, i) => currentYear - i);
+
+const fuelTypes = ["PETROL", "DIESEL", "ELECTRIC", "HYBRID", "OTHER"];
+const transmissionTypes = ["MANUAL", "AUTOMATIC", "SEMI_AUTOMATIC"];
 
 const SearchPage = () => {
 	const [brands, setBrands] = useState([]);
-	const [selectedBrandIds, setSelectedBrandIds] = useState([]);
+	const [selectedBrand, setSelectedBrand] = useState(null);
+	const [modelSearch, setModelSearch] = useState("");
 	const [minPrice, setMinPrice] = useState("");
 	const [maxPrice, setMaxPrice] = useState("");
+	const [minYear, setMinYear] = useState("");
+	const [maxYear, setMaxYear] = useState("");
+	const [minMileage, setMinMileage] = useState("");
+	const [maxMileage, setMaxMileage] = useState("");
+	const [selectedCity, setSelectedCity] = useState("");
+	const [selectedFuelType, setSelectedFuelType] = useState("");
+	const [selectedTransmission, setSelectedTransmission] = useState("");
 	const [cars, setCars] = useState([]);
 	const [hasNextPage, setHasNextPage] = useState(false);
 	const [page, setPage] = useState(1);
 	const [totalItems, setTotalItems] = useState(0);
 
-	// New state for listing type and date range
+	// Debounced values for search
+	const debouncedMinPrice = useDebounce(minPrice);
+	const debouncedMaxPrice = useDebounce(maxPrice);
+	const debouncedMinMileage = useDebounce(minMileage);
+	const debouncedMaxMileage = useDebounce(maxMileage);
+	const debouncedModelSearch = useDebounce(modelSearch);
+
 	const [listingType, setListingType] = useState("SALE");
 	const [startDate, setStartDate] = useState("");
 	const [endDate, setEndDate] = useState("");
-
 	const [isFilterOpen, setIsFilterOpen] = useState(false);
 
 	const { handleApiCall: getBrandsApiCall, loading: loadingBrands } =
@@ -33,7 +55,7 @@ const SearchPage = () => {
 			onError: () => {
 				toast.error("Failed to search cars");
 			},
-		},
+		}
 	);
 
 	useEffect(() => {
@@ -41,9 +63,17 @@ const SearchPage = () => {
 		setPage(1);
 		searchCarsApiCall({
 			page: 1,
-			minPrice: minPrice || undefined,
-			maxPrice: maxPrice || undefined,
-			brandIds: selectedBrandIds,
+			minPrice: debouncedMinPrice || undefined,
+			maxPrice: debouncedMaxPrice || undefined,
+			minYear: minYear || undefined,
+			maxYear: maxYear || undefined,
+			minMileage: debouncedMinMileage || undefined,
+			maxMileage: debouncedMaxMileage || undefined,
+			brandIds: selectedBrand ? [selectedBrand.value] : undefined,
+			modelSearch: debouncedModelSearch || undefined,
+			city: selectedCity || undefined,
+			fuelType: selectedFuelType || undefined,
+			transmission: selectedTransmission || undefined,
 			listingType,
 			startDate: startDate || undefined,
 			endDate: endDate || undefined,
@@ -54,16 +84,39 @@ const SearchPage = () => {
 				setTotalItems(data.totalItems);
 			}
 		});
-	}, [selectedBrandIds, minPrice, maxPrice, listingType, startDate, endDate]);
+	}, [
+		selectedBrand,
+		debouncedModelSearch,
+		debouncedMinPrice,
+		debouncedMaxPrice,
+		debouncedMinMileage,
+		debouncedMaxMileage,
+		minYear,
+		maxYear,
+		selectedCity,
+		selectedFuelType,
+		selectedTransmission,
+		listingType,
+		startDate,
+		endDate,
+	]);
 
 	useEffect(() => {
 		// Load more results when page changes
 		if (page > 1) {
 			searchCarsApiCall({
 				page,
-				minPrice: minPrice || undefined,
-				maxPrice: maxPrice || undefined,
-				brandIds: selectedBrandIds,
+				minPrice: debouncedMinPrice || undefined,
+				maxPrice: debouncedMaxPrice || undefined,
+				minYear: minYear || undefined,
+				maxYear: maxYear || undefined,
+				minMileage: debouncedMinMileage || undefined,
+				maxMileage: debouncedMaxMileage || undefined,
+				brandIds: selectedBrand ? [selectedBrand.value] : undefined,
+				modelSearch: debouncedModelSearch || undefined,
+				city: selectedCity || undefined,
+				fuelType: selectedFuelType || undefined,
+				transmission: selectedTransmission || undefined,
 				listingType,
 				startDate: startDate || undefined,
 				endDate: endDate || undefined,
@@ -79,14 +132,28 @@ const SearchPage = () => {
 
 	useEffect(() => {
 		getBrandsApiCall().then((data) => {
-			setBrands(data);
+			if (data) {
+				const brandOptions = data.map(brand => ({
+					value: brand.id,
+					label: brand.name
+				}));
+				setBrands(brandOptions);
+			}
 		});
 	}, []);
 
 	const handleResetFilters = () => {
-		setSelectedBrandIds([]);
+		setSelectedBrand(null);
+		setModelSearch("");
 		setMinPrice("");
 		setMaxPrice("");
+		setMinYear("");
+		setMaxYear("");
+		setMinMileage("");
+		setMaxMileage("");
+		setSelectedCity("");
+		setSelectedFuelType("");
+		setSelectedTransmission("");
 		setStartDate("");
 		setEndDate("");
 		setPage(1);
@@ -259,7 +326,9 @@ const SearchPage = () => {
 				<div className="flex flex-col gap-8 md:flex-row">
 					{/* Sidebar */}
 					<div
-						className={`w-full md:w-64 md:flex-shrink-0 ${isFilterOpen ? "block" : "hidden md:block"}`}
+						className={`w-full md:w-64 md:flex-shrink-0 ${
+							isFilterOpen ? "block" : "hidden md:block"
+						}`}
 					>
 						<div className="rounded-xl bg-white p-4 shadow-md">
 							<div className="mb-4 flex items-center justify-between">
@@ -275,89 +344,167 @@ const SearchPage = () => {
 							<div className="space-y-4">
 								{/* Brand Filter */}
 								<div>
-									<h4 className="mb-2 text-sm font-medium">
-										Brand
-									</h4>
+									<h4 className="mb-2 text-sm font-medium">Brand</h4>
 									{loadingBrands ? (
 										<div className="flex items-center justify-center py-4">
 											<div className="h-4 w-4 animate-spin rounded-full border-2 border-theme-blue border-t-transparent"></div>
 										</div>
 									) : (
-										<div className="max-h-48 space-y-2 overflow-y-auto">
-											{brands.map((brand) => (
-												<label
-													key={brand.id}
-													className="flex cursor-pointer items-center gap-2 rounded p-1 hover:bg-gray-50"
-												>
-													<input
-														type="checkbox"
-														className="rounded border-gray-300 text-theme-blue focus:ring-theme-blue"
-														checked={selectedBrandIds.includes(
-															brand.id,
-														)}
-														onChange={(e) => {
-															if (
-																e.target.checked
-															) {
-																setSelectedBrandIds(
-																	[
-																		...selectedBrandIds,
-																		brand.id,
-																	],
-																);
-															} else {
-																setSelectedBrandIds(
-																	selectedBrandIds.filter(
-																		(id) =>
-																			id !==
-																			brand.id,
-																	),
-																);
-															}
-														}}
-													/>
-													<span className="text-sm">
-														{brand.name}
-													</span>
-												</label>
-											))}
-										</div>
+										<Select
+											value={selectedBrand}
+											onChange={setSelectedBrand}
+											options={brands}
+											isClearable
+											placeholder="Select Brand"
+											className="text-sm"
+											classNamePrefix="react-select"
+										/>
 									)}
+								</div>
+
+								{/* Model Search */}
+								<div>
+									<h4 className="mb-2 text-sm font-medium">Model Search</h4>
+									<input
+										type="text"
+										value={modelSearch}
+										onChange={(e) => setModelSearch(e.target.value)}
+										placeholder="Search by model..."
+										className="w-full rounded border border-gray-300 px-2 py-1 text-sm focus:border-theme-blue focus:outline-none"
+									/>
+								</div>
+
+								{/* City Filter */}
+								<div>
+									<h4 className="mb-2 text-sm font-medium">City</h4>
+									<select
+										value={selectedCity}
+										onChange={(e) => setSelectedCity(e.target.value)}
+										className="w-full rounded border border-gray-300 px-2 py-1 text-sm focus:border-theme-blue focus:outline-none"
+									>
+										<option value="">All Cities</option>
+										{albanianCities.map((city) => (
+											<option key={city} value={city}>
+												{city}
+											</option>
+										))}
+									</select>
+								</div>
+
+								{/* Year Filter */}
+								<div>
+									<h4 className="mb-2 text-sm font-medium">Year Range</h4>
+									<div className="flex items-center space-x-2">
+										<select
+											value={minYear}
+											onChange={(e) => setMinYear(e.target.value)}
+											className="w-full rounded border border-gray-300 px-2 py-1 text-sm focus:border-theme-blue focus:outline-none"
+										>
+											<option value="">Min Year</option>
+											{yearRange.map((year) => (
+												<option key={year} value={year}>
+													{year}
+												</option>
+											))}
+										</select>
+										<span className="text-sm text-gray-500">to</span>
+										<select
+											value={maxYear}
+											onChange={(e) => setMaxYear(e.target.value)}
+											className="w-full rounded border border-gray-300 px-2 py-1 text-sm focus:border-theme-blue focus:outline-none"
+										>
+											<option value="">Max Year</option>
+											{yearRange.map((year) => (
+												<option key={year} value={year}>
+													{year}
+												</option>
+											))}
+										</select>
+									</div>
 								</div>
 
 								{/* Price Filter */}
 								<div>
 									<h4 className="mb-2 text-sm font-medium">
-										Price Range{" "}
-										{listingType === "RENT"
-											? "(per day)"
-											: ""}
+										Price Range {listingType === "RENT" ? "(per day)" : ""}
 									</h4>
 									<div className="flex items-center space-x-2">
 										<input
 											type="number"
 											min="0"
 											value={minPrice}
-											onChange={(e) =>
-												handlePriceChange(e, "min")
-											}
+											onChange={(e) => setMinPrice(e.target.value)}
 											className="w-full rounded border border-gray-300 px-2 py-1 text-sm [appearance:textfield] focus:border-theme-blue focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
 											placeholder="Min"
 										/>
-										<span className="text-sm text-gray-500">
-											to
-										</span>
+										<span className="text-sm text-gray-500">to</span>
 										<input
 											type="number"
 											min="0"
 											value={maxPrice}
-											onChange={(e) =>
-												handlePriceChange(e, "max")
-											}
+											onChange={(e) => setMaxPrice(e.target.value)}
 											className="w-full rounded border border-gray-300 px-2 py-1 text-sm [appearance:textfield] focus:border-theme-blue focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
 											placeholder="Max"
 										/>
 									</div>
+								</div>
+
+								{/* Mileage Filter */}
+								<div>
+									<h4 className="mb-2 text-sm font-medium">Mileage (km)</h4>
+									<div className="flex items-center space-x-2">
+										<input
+											type="number"
+											min="0"
+											value={minMileage}
+											onChange={(e) => setMinMileage(e.target.value)}
+											className="w-full rounded border border-gray-300 px-2 py-1 text-sm [appearance:textfield] focus:border-theme-blue focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+											placeholder="Min"
+										/>
+										<span className="text-sm text-gray-500">to</span>
+										<input
+											type="number"
+											min="0"
+											value={maxMileage}
+											onChange={(e) => setMaxMileage(e.target.value)}
+											className="w-full rounded border border-gray-300 px-2 py-1 text-sm [appearance:textfield] focus:border-theme-blue focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+											placeholder="Max"
+										/>
+									</div>
+								</div>
+
+								{/* Fuel Type Filter */}
+								<div>
+									<h4 className="mb-2 text-sm font-medium">Fuel Type</h4>
+									<select
+										value={selectedFuelType}
+										onChange={(e) => setSelectedFuelType(e.target.value)}
+										className="w-full rounded border border-gray-300 px-2 py-1 text-sm focus:border-theme-blue focus:outline-none"
+									>
+										<option value="">All Fuel Types</option>
+										{fuelTypes.map((type) => (
+											<option key={type} value={type}>
+												{type.charAt(0) + type.slice(1).toLowerCase()}
+											</option>
+										))}
+									</select>
+								</div>
+
+								{/* Transmission Filter */}
+								<div>
+									<h4 className="mb-2 text-sm font-medium">Transmission</h4>
+									<select
+										value={selectedTransmission}
+										onChange={(e) => setSelectedTransmission(e.target.value)}
+										className="w-full rounded border border-gray-300 px-2 py-1 text-sm focus:border-theme-blue focus:outline-none"
+									>
+										<option value="">All Transmissions</option>
+										{transmissionTypes.map((type) => (
+											<option key={type} value={type}>
+												{type.charAt(0) + type.slice(1).toLowerCase().replace('_', ' ')}
+											</option>
+										))}
+									</select>
 								</div>
 							</div>
 						</div>
