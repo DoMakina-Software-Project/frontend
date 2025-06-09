@@ -22,6 +22,7 @@ const CarCard = ({
 	updateIsSold,
 	onImageClick = () => {},
 	onManageAvailability,
+	hasPromotionPrice,
 }) => {
 	const [showRejectionModal, setShowRejectionModal] = useState(false);
 
@@ -95,50 +96,54 @@ const CarCard = ({
 									className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
 								>
 									<MdDelete className="mr-3 w-5" size={20} />
-									Delete
+									Hide
 								</button>
 
-								<button
-									onClick={onPromote}
-									className="flex w-full items-center whitespace-nowrap px-4 py-2 text-xs text-gray-700 hover:bg-gray-100"
-								>
-									{car?.promoted ? (
-										<MdStar
-											className="mr-3 w-5"
-											size={20}
-										/>
-									) : (
-										<MdStarOutline
-											className="mr-3 w-5"
-											size={20}
-										/>
-									)}
-									{car?.promoted
-										? "Remove Promotion"
-										: "Add Promotion"}
-								</button>
+								{hasPromotionPrice && (
+									<button
+										onClick={onPromote}
+										className="flex w-full items-center whitespace-nowrap px-4 py-2 text-xs text-gray-700 hover:bg-gray-100"
+									>
+										{car?.promoted ? (
+											<MdStar
+												className="mr-3 w-5"
+												size={20}
+											/>
+										) : (
+											<MdStarOutline
+												className="mr-3 w-5"
+												size={20}
+											/>
+										)}
+										{car?.promoted
+											? "Remove Promotion"
+											: "Add Promotion"}
+									</button>
+								)}
 
-								<button
-									onClick={() => {
-										updateIsSold();
-									}}
-									className="flex w-full items-center px-4 py-2 text-xs text-gray-700 hover:bg-gray-100"
-								>
-									{car.isSold ? (
-										<MdSell
-											className="mr-3 w-5"
-											size={18}
-										/>
-									) : (
-										<MdOutlineSell
-											className="mr-3 w-5"
-											size={18}
-										/>
-									)}
-									{car.isSold
-										? "Mark as Available"
-										: "Mark as Sold"}
-								</button>
+								{car?.listingType === "SALE" && (
+									<button
+										onClick={() => {
+											updateIsSold();
+										}}
+										className="flex w-full items-center px-4 py-2 text-xs text-gray-700 hover:bg-gray-100"
+									>
+										{car.status === "SOLD" ? (
+											<MdSell
+												className="mr-3 w-5"
+												size={18}
+											/>
+										) : (
+											<MdOutlineSell
+												className="mr-3 w-5"
+												size={18}
+											/>
+										)}
+										{car.status === "SOLD"
+											? "Mark as Available"
+											: "Mark as Sold"}
+									</button>
+								)}
 							</div>
 						</div>
 					</div>
@@ -191,7 +196,7 @@ const CarCard = ({
 								Promoted
 							</span>
 						)}
-						{car?.isSold && (
+						{car?.status === "SOLD" && (
 							<span className="rounded bg-red-100 px-2 py-1 text-xs text-red-600">
 								Sold
 							</span>

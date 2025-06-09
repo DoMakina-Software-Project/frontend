@@ -6,9 +6,17 @@ export { getAllBrandsSimple } from "./public";
 export const createSellerProfile = (formData) =>
 	axios.post("/seller/profile", formData);
 
-export const getCars = () => axios.get("/seller/cars");
+export const getCars = ({ page = 1, listingType = "" } = {}) =>
+	axios.get("/seller/cars", {
+		params: {
+			page,
+			listingType,
+		},
+	});
 
 export const getCar = ({ id }) => axios.get(`/seller/cars/${id}`);
+
+export const getPromotionPrice = () => axios.get("/public/promotion-price");
 
 export const getVerificationStats = () =>
 	axios.get("/seller/cars/verification/stats");

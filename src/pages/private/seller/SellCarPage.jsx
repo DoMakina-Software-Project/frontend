@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { createCar } from "../../../api/seller";
 import { getAllBrandsSimple } from "../../../api/public";
 import { useApi } from "../../../hooks";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { clearErrors } from "../../../utils/form";
 import {
 	StepIndicator,
@@ -13,26 +13,46 @@ import {
 	NavigationButtons,
 } from "../../../components/pages/SellCar";
 
-const initialState = {
+const VALID_LISTING_TYPES = ["SALE", "RENT"];
+
+const getInitialState = (defaultListingType = "SALE") => ({
 	brand: { value: "", error: "" },
 	model: { value: "", error: "" },
 	year: { value: "", error: "" },
 	price: { value: "", error: "" },
 	description: { value: "", error: "" },
 	photos: { value: [], error: "" },
-	listingType: { value: "SALE", error: "" },
+	listingType: { value: defaultListingType, error: "" },
 	fuelType: { value: "PETROL", error: "" },
 	transmission: { value: "MANUAL", error: "" },
 	mileage: { value: "", error: "" },
-};
+});
 
 const currentYear = new Date().getFullYear();
 const yearOptions = Array.from(
 	{ length: currentYear - 1989 },
-	(_, i) => currentYear - i
+	(_, i) => currentYear - i,
 );
 
 const SellCarPage = () => {
+	const location = useLocation();
+	const navigate = useNavigate();
+
+	// Parse and validate listing type from URL
+	const getValidatedListingType = () => {
+		const params = new URLSearchParams(location.search);
+		const type = params.get("type")?.toUpperCase();
+		return VALID_LISTING_TYPES.includes(type) ? type : "SALE";
+	};
+
+	const [formState, setFormState] = useState(
+		getInitialState(getValidatedListingType()),
+	);
+	const [brands, setBrands] = useState([]);
+	const [filteredBrands, setFilteredBrands] = useState([]);
+	const [activeStep, setActiveStep] = useState(1);
+	const totalSteps = 3;
+
 	const { handleApiCall: createCarApiCall, loading: loadingCreateCar } =
 		useApi(createCar, {
 			onValidationError: (error) => {
@@ -50,16 +70,17 @@ const SellCarPage = () => {
 	const { handleApiCall: getBrandsApiCall, loading: loadingBrands } =
 		useApi(getAllBrandsSimple);
 
-	const navigate = useNavigate();
-
-	const [formState, setFormState] = useState(initialState);
-	const [brands, setBrands] = useState([]);
-	const [filteredBrands, setFilteredBrands] = useState([]);
-	const [activeStep, setActiveStep] = useState(1);
-	const totalSteps = 3;
+	// Update form when URL changes
+	useEffect(() => {
+		const listingType = getValidatedListingType();
+		setFormState((prev) => ({
+			...prev,
+			listingType: { value: listingType, error: "" },
+		}));
+	}, [location.search]);
 
 	const resetForm = () => {
-		setFormState(initialState);
+		setFormState(getInitialState());
 		setActiveStep(1);
 	};
 
@@ -124,10 +145,12 @@ const SellCarPage = () => {
 			newState.description.error = "Description is required";
 			isValid = false;
 		} else if (description.value.length < 10) {
-			newState.description.error = "Description must be at least 10 characters";
+			newState.description.error =
+				"Description must be at least 10 characters";
 			isValid = false;
 		} else if (description.value.length > 500) {
-			newState.description.error = "Description must be at most 500 characters";
+			newState.description.error =
+				"Description must be at most 500 characters";
 			isValid = false;
 		}
 
@@ -173,14 +196,19 @@ const SellCarPage = () => {
 		}
 
 		// Check file types and sizes
-		const invalidFiles = photos.value.filter(file => {
-			const isValidType = ['image/jpeg', 'image/png', 'image/webp'].includes(file.type);
+		const invalidFiles = photos.value.filter((file) => {
+			const isValidType = [
+				"image/jpeg",
+				"image/png",
+				"image/webp",
+			].includes(file.type);
 			const isValidSize = file.size <= 5 * 1024 * 1024; // 5MB
 			return !isValidType || !isValidSize;
 		});
 
 		if (invalidFiles.length > 0) {
-			newState.photos.error = "All photos must be JPG, PNG, or WebP and under 5MB";
+			newState.photos.error =
+				"All photos must be JPG, PNG, or WebP and under 5MB";
 			isValid = false;
 		}
 
@@ -261,7 +289,7 @@ const SellCarPage = () => {
 			return;
 		}
 		const filtered = brands.filter((brand) =>
-			brand.name.toLowerCase().includes(searchTerm.toLowerCase())
+			brand.name.toLowerCase().includes(searchTerm.toLowerCase()),
 		);
 		setFilteredBrands(filtered);
 	};
@@ -279,7 +307,10 @@ const SellCarPage = () => {
 				<div className="w-full max-w-4xl rounded-2xl bg-white p-8 shadow-lg">
 					<div className="mb-8 text-center">
 						<h1 className="text-3xl font-bold text-gray-900">
-							List a Car
+							List a Car for{" "}
+							{formState.listingType.value === "RENT"
+								? "Rent"
+								: "Sale"}
 						</h1>
 						<p className="mt-2 text-sm text-gray-600">
 							Please provide the details of your car to create a
