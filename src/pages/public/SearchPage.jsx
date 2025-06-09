@@ -6,17 +6,22 @@ import { useApi } from "../../hooks";
 import useDebounce from "../../hooks/useDebounce";
 import { searchCars, getAllBrandsSimple } from "../../api/public";
 import { FaCar, FaHome, FaCalendarAlt, FaInfoCircle } from "react-icons/fa";
-import { albanianCities } from "../../data/cities";
-import Select from 'react-select';
+import { ALBANIAN_CITIES } from "../../data/cities";
+import Select from "react-select";
 import toast from "react-hot-toast";
+import { useSearchParams } from "react-router-dom";
 
 const currentYear = new Date().getFullYear();
-const yearRange = Array.from({ length: currentYear - 1989 }, (_, i) => currentYear - i);
+const yearRange = Array.from(
+	{ length: currentYear - 1989 },
+	(_, i) => currentYear - i,
+);
 
 const fuelTypes = ["PETROL", "DIESEL", "ELECTRIC", "HYBRID", "OTHER"];
 const transmissionTypes = ["MANUAL", "AUTOMATIC", "SEMI_AUTOMATIC"];
 
 const SearchPage = () => {
+	const [searchParams, setSearchParams] = useSearchParams();
 	const [brands, setBrands] = useState([]);
 	const [selectedBrand, setSelectedBrand] = useState(null);
 	const [modelSearch, setModelSearch] = useState("");
@@ -45,6 +50,7 @@ const SearchPage = () => {
 	const [startDate, setStartDate] = useState("");
 	const [endDate, setEndDate] = useState("");
 	const [isFilterOpen, setIsFilterOpen] = useState(false);
+	const [isInitialized, setIsInitialized] = useState(false);
 
 	const { handleApiCall: getBrandsApiCall, loading: loadingBrands } =
 		useApi(getAllBrandsSimple);
@@ -55,7 +61,7 @@ const SearchPage = () => {
 			onError: () => {
 				toast.error("Failed to search cars");
 			},
-		}
+		},
 	);
 
 	useEffect(() => {
@@ -133,14 +139,105 @@ const SearchPage = () => {
 	useEffect(() => {
 		getBrandsApiCall().then((data) => {
 			if (data) {
-				const brandOptions = data.map(brand => ({
+				const brandOptions = data.map((brand) => ({
 					value: brand.id,
-					label: brand.name
+					label: brand.name,
 				}));
 				setBrands(brandOptions);
 			}
 		});
 	}, []);
+
+	// Validation functions
+	const isValidListingType = (type) => ["SALE", "RENT"].includes(type);
+	const isValidDate = (dateString) => {
+		if (!dateString) return false;
+		const regex = /^\d{4}-\d{2}-\d{2}$/;
+		return regex.test(dateString) && !isNaN(new Date(dateString).getTime());
+	};
+	const isValidNumber = (value) => {
+		const num = parseFloat(value);
+		return !isNaN(num) && num >= 0;
+	};
+	const isValidYear = (year) => {
+		const yearNum = parseInt(year);
+		return !isNaN(yearNum) && yearNum >= 1990 && yearNum <= currentYear;
+	};
+	const isValidFuelType = (type) => fuelTypes.includes(type);
+	const isValidTransmission = (type) => transmissionTypes.includes(type);
+	const isValidCity = (city) => ALBANIAN_CITIES.includes(city);
+
+	// Initialize state from URL parameters on component mount (only once)
+	useEffect(() => {
+		if (isInitialized) return;
+
+		const urlListingType = searchParams.get("listingType");
+		const urlStartDate = searchParams.get("startDate");
+		const urlEndDate = searchParams.get("endDate");
+		const urlBrandId = searchParams.get("brandId");
+		const urlModelSearch = searchParams.get("modelSearch");
+		const urlCity = searchParams.get("city");
+		const urlFuelType = searchParams.get("fuelType");
+		const urlTransmission = searchParams.get("transmission");
+		const urlMinPrice = searchParams.get("minPrice");
+		const urlMaxPrice = searchParams.get("maxPrice");
+		const urlMinYear = searchParams.get("minYear");
+		const urlMaxYear = searchParams.get("maxYear");
+		const urlMinMileage = searchParams.get("minMileage");
+		const urlMaxMileage = searchParams.get("maxMileage");
+
+		// Validate and set parameters
+		if (urlListingType && isValidListingType(urlListingType)) {
+			setListingType(urlListingType);
+		}
+		if (urlStartDate && isValidDate(urlStartDate)) {
+			setStartDate(urlStartDate);
+		}
+		if (urlEndDate && isValidDate(urlEndDate)) {
+			setEndDate(urlEndDate);
+		}
+		if (urlModelSearch && urlModelSearch.trim().length > 0) {
+			setModelSearch(urlModelSearch.trim());
+		}
+		if (urlCity && isValidCity(urlCity)) {
+			setSelectedCity(urlCity);
+		}
+		if (urlFuelType && isValidFuelType(urlFuelType)) {
+			setSelectedFuelType(urlFuelType);
+		}
+		if (urlTransmission && isValidTransmission(urlTransmission)) {
+			setSelectedTransmission(urlTransmission);
+		}
+		if (urlMinPrice && isValidNumber(urlMinPrice)) {
+			setMinPrice(urlMinPrice);
+		}
+		if (urlMaxPrice && isValidNumber(urlMaxPrice)) {
+			setMaxPrice(urlMaxPrice);
+		}
+		if (urlMinYear && isValidYear(urlMinYear)) {
+			setMinYear(urlMinYear);
+		}
+		if (urlMaxYear && isValidYear(urlMaxYear)) {
+			setMaxYear(urlMaxYear);
+		}
+		if (urlMinMileage && isValidNumber(urlMinMileage)) {
+			setMinMileage(urlMinMileage);
+		}
+		if (urlMaxMileage && isValidNumber(urlMaxMileage)) {
+			setMaxMileage(urlMaxMileage);
+		}
+
+		// Handle brand selection after brands are loaded
+		if (urlBrandId && brands.length > 0) {
+			const brandId = parseInt(urlBrandId);
+			if (!isNaN(brandId)) {
+				const brand = brands.find((b) => b.value === brandId);
+				if (brand) setSelectedBrand(brand);
+			}
+		}
+
+		setIsInitialized(true);
+	}, [searchParams, brands, isInitialized]);
 
 	const handleResetFilters = () => {
 		setSelectedBrand(null);
@@ -157,6 +254,8 @@ const SearchPage = () => {
 		setStartDate("");
 		setEndDate("");
 		setPage(1);
+		// Clear URL params as well
+		setSearchParams(new URLSearchParams(), { replace: true });
 	};
 
 	const handleListingTypeChange = (type) => {
@@ -168,16 +267,6 @@ const SearchPage = () => {
 
 	const loadMore = () => {
 		setPage((prevPage) => prevPage + 1);
-	};
-
-	const handlePriceChange = (e, type) => {
-		const value = e.target.value;
-		if (type === "min") {
-			setMinPrice(value);
-		} else {
-			setMaxPrice(value);
-		}
-		setPage(1);
 	};
 
 	const handleDateChange = (e, type) => {
@@ -199,7 +288,7 @@ const SearchPage = () => {
 		if (listingType === "RENT" && startDate && endDate) {
 			const start = new Date(startDate);
 			const end = new Date(endDate);
-			if (start >= end) {
+			if (start > end) {
 				toast.error("Return date must be after pickup date");
 				return false;
 			}
@@ -210,6 +299,76 @@ const SearchPage = () => {
 	useEffect(() => {
 		validateDates();
 	}, [startDate, endDate, listingType]);
+
+	// Update URL parameters when search criteria change (only after initialization)
+	useEffect(() => {
+		if (!isInitialized) return;
+
+		const params = new URLSearchParams();
+
+		// Only add valid parameters to URL
+		if (listingType && isValidListingType(listingType)) {
+			params.set("listingType", listingType);
+		}
+		if (startDate && listingType === "RENT" && isValidDate(startDate)) {
+			params.set("startDate", startDate);
+		}
+		if (endDate && listingType === "RENT" && isValidDate(endDate)) {
+			params.set("endDate", endDate);
+		}
+		if (selectedBrand && selectedBrand.value) {
+			params.set("brandId", selectedBrand.value.toString());
+		}
+		if (modelSearch && modelSearch.trim().length > 0) {
+			params.set("modelSearch", modelSearch.trim());
+		}
+		if (selectedCity && isValidCity(selectedCity)) {
+			params.set("city", selectedCity);
+		}
+		if (selectedFuelType && isValidFuelType(selectedFuelType)) {
+			params.set("fuelType", selectedFuelType);
+		}
+		if (selectedTransmission && isValidTransmission(selectedTransmission)) {
+			params.set("transmission", selectedTransmission);
+		}
+		if (minPrice && isValidNumber(minPrice)) {
+			params.set("minPrice", minPrice);
+		}
+		if (maxPrice && isValidNumber(maxPrice)) {
+			params.set("maxPrice", maxPrice);
+		}
+		if (minYear && isValidYear(minYear)) {
+			params.set("minYear", minYear);
+		}
+		if (maxYear && isValidYear(maxYear)) {
+			params.set("maxYear", maxYear);
+		}
+		if (minMileage && isValidNumber(minMileage)) {
+			params.set("minMileage", minMileage);
+		}
+		if (maxMileage && isValidNumber(maxMileage)) {
+			params.set("maxMileage", maxMileage);
+		}
+
+		setSearchParams(params, { replace: true });
+	}, [
+		isInitialized,
+		listingType,
+		startDate,
+		endDate,
+		selectedBrand,
+		modelSearch,
+		selectedCity,
+		selectedFuelType,
+		selectedTransmission,
+		minPrice,
+		maxPrice,
+		minYear,
+		maxYear,
+		minMileage,
+		maxMileage,
+		setSearchParams,
+	]);
 
 	return (
 		<MainLayout
@@ -344,7 +503,9 @@ const SearchPage = () => {
 							<div className="space-y-4">
 								{/* Brand Filter */}
 								<div>
-									<h4 className="mb-2 text-sm font-medium">Brand</h4>
+									<h4 className="mb-2 text-sm font-medium">
+										Brand
+									</h4>
 									{loadingBrands ? (
 										<div className="flex items-center justify-center py-4">
 											<div className="h-4 w-4 animate-spin rounded-full border-2 border-theme-blue border-t-transparent"></div>
@@ -364,11 +525,15 @@ const SearchPage = () => {
 
 								{/* Model Search */}
 								<div>
-									<h4 className="mb-2 text-sm font-medium">Model Search</h4>
+									<h4 className="mb-2 text-sm font-medium">
+										Model Search
+									</h4>
 									<input
 										type="text"
 										value={modelSearch}
-										onChange={(e) => setModelSearch(e.target.value)}
+										onChange={(e) =>
+											setModelSearch(e.target.value)
+										}
 										placeholder="Search by model..."
 										className="w-full rounded border border-gray-300 px-2 py-1 text-sm focus:border-theme-blue focus:outline-none"
 									/>
@@ -376,28 +541,47 @@ const SearchPage = () => {
 
 								{/* City Filter */}
 								<div>
-									<h4 className="mb-2 text-sm font-medium">City</h4>
-									<select
-										value={selectedCity}
-										onChange={(e) => setSelectedCity(e.target.value)}
-										className="w-full rounded border border-gray-300 px-2 py-1 text-sm focus:border-theme-blue focus:outline-none"
-									>
-										<option value="">All Cities</option>
-										{albanianCities.map((city) => (
-											<option key={city} value={city}>
-												{city}
-											</option>
-										))}
-									</select>
+									<h4 className="mb-2 text-sm font-medium">
+										City
+									</h4>
+									<Select
+										value={
+											selectedCity
+												? {
+														value: selectedCity,
+														label: selectedCity,
+													}
+												: null
+										}
+										onChange={(option) =>
+											setSelectedCity(
+												option ? option.value : "",
+											)
+										}
+										options={ALBANIAN_CITIES.map(
+											(city) => ({
+												value: city,
+												label: city,
+											}),
+										)}
+										isClearable
+										placeholder="Select City"
+										className="text-sm"
+										classNamePrefix="react-select"
+									/>
 								</div>
 
 								{/* Year Filter */}
 								<div>
-									<h4 className="mb-2 text-sm font-medium">Year Range</h4>
+									<h4 className="mb-2 text-sm font-medium">
+										Year Range
+									</h4>
 									<div className="flex items-center space-x-2">
 										<select
 											value={minYear}
-											onChange={(e) => setMinYear(e.target.value)}
+											onChange={(e) =>
+												setMinYear(e.target.value)
+											}
 											className="w-full rounded border border-gray-300 px-2 py-1 text-sm focus:border-theme-blue focus:outline-none"
 										>
 											<option value="">Min Year</option>
@@ -407,10 +591,14 @@ const SearchPage = () => {
 												</option>
 											))}
 										</select>
-										<span className="text-sm text-gray-500">to</span>
+										<span className="text-sm text-gray-500">
+											to
+										</span>
 										<select
 											value={maxYear}
-											onChange={(e) => setMaxYear(e.target.value)}
+											onChange={(e) =>
+												setMaxYear(e.target.value)
+											}
 											className="w-full rounded border border-gray-300 px-2 py-1 text-sm focus:border-theme-blue focus:outline-none"
 										>
 											<option value="">Max Year</option>
@@ -426,23 +614,32 @@ const SearchPage = () => {
 								{/* Price Filter */}
 								<div>
 									<h4 className="mb-2 text-sm font-medium">
-										Price Range {listingType === "RENT" ? "(per day)" : ""}
+										Price Range{" "}
+										{listingType === "RENT"
+											? "(per day)"
+											: ""}
 									</h4>
 									<div className="flex items-center space-x-2">
 										<input
 											type="number"
 											min="0"
 											value={minPrice}
-											onChange={(e) => setMinPrice(e.target.value)}
+											onChange={(e) =>
+												setMinPrice(e.target.value)
+											}
 											className="w-full rounded border border-gray-300 px-2 py-1 text-sm [appearance:textfield] focus:border-theme-blue focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
 											placeholder="Min"
 										/>
-										<span className="text-sm text-gray-500">to</span>
+										<span className="text-sm text-gray-500">
+											to
+										</span>
 										<input
 											type="number"
 											min="0"
 											value={maxPrice}
-											onChange={(e) => setMaxPrice(e.target.value)}
+											onChange={(e) =>
+												setMaxPrice(e.target.value)
+											}
 											className="w-full rounded border border-gray-300 px-2 py-1 text-sm [appearance:textfield] focus:border-theme-blue focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
 											placeholder="Max"
 										/>
@@ -451,22 +648,30 @@ const SearchPage = () => {
 
 								{/* Mileage Filter */}
 								<div>
-									<h4 className="mb-2 text-sm font-medium">Mileage (km)</h4>
+									<h4 className="mb-2 text-sm font-medium">
+										Mileage (km)
+									</h4>
 									<div className="flex items-center space-x-2">
 										<input
 											type="number"
 											min="0"
 											value={minMileage}
-											onChange={(e) => setMinMileage(e.target.value)}
+											onChange={(e) =>
+												setMinMileage(e.target.value)
+											}
 											className="w-full rounded border border-gray-300 px-2 py-1 text-sm [appearance:textfield] focus:border-theme-blue focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
 											placeholder="Min"
 										/>
-										<span className="text-sm text-gray-500">to</span>
+										<span className="text-sm text-gray-500">
+											to
+										</span>
 										<input
 											type="number"
 											min="0"
 											value={maxMileage}
-											onChange={(e) => setMaxMileage(e.target.value)}
+											onChange={(e) =>
+												setMaxMileage(e.target.value)
+											}
 											className="w-full rounded border border-gray-300 px-2 py-1 text-sm [appearance:textfield] focus:border-theme-blue focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
 											placeholder="Max"
 										/>
@@ -475,16 +680,21 @@ const SearchPage = () => {
 
 								{/* Fuel Type Filter */}
 								<div>
-									<h4 className="mb-2 text-sm font-medium">Fuel Type</h4>
+									<h4 className="mb-2 text-sm font-medium">
+										Fuel Type
+									</h4>
 									<select
 										value={selectedFuelType}
-										onChange={(e) => setSelectedFuelType(e.target.value)}
+										onChange={(e) =>
+											setSelectedFuelType(e.target.value)
+										}
 										className="w-full rounded border border-gray-300 px-2 py-1 text-sm focus:border-theme-blue focus:outline-none"
 									>
 										<option value="">All Fuel Types</option>
 										{fuelTypes.map((type) => (
 											<option key={type} value={type}>
-												{type.charAt(0) + type.slice(1).toLowerCase()}
+												{type.charAt(0) +
+													type.slice(1).toLowerCase()}
 											</option>
 										))}
 									</select>
@@ -492,16 +702,28 @@ const SearchPage = () => {
 
 								{/* Transmission Filter */}
 								<div>
-									<h4 className="mb-2 text-sm font-medium">Transmission</h4>
+									<h4 className="mb-2 text-sm font-medium">
+										Transmission
+									</h4>
 									<select
 										value={selectedTransmission}
-										onChange={(e) => setSelectedTransmission(e.target.value)}
+										onChange={(e) =>
+											setSelectedTransmission(
+												e.target.value,
+											)
+										}
 										className="w-full rounded border border-gray-300 px-2 py-1 text-sm focus:border-theme-blue focus:outline-none"
 									>
-										<option value="">All Transmissions</option>
+										<option value="">
+											All Transmissions
+										</option>
 										{transmissionTypes.map((type) => (
 											<option key={type} value={type}>
-												{type.charAt(0) + type.slice(1).toLowerCase().replace('_', ' ')}
+												{type.charAt(0) +
+													type
+														.slice(1)
+														.toLowerCase()
+														.replace("_", " ")}
 											</option>
 										))}
 									</select>

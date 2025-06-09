@@ -90,6 +90,9 @@ const Header = () => {
 		},
 	];
 
+	// Check if user is logged in and has CLIENT role
+	const isClient = currentUser && selectedRole === "CLIENT";
+
 	return (
 		<header className="flex w-full items-center justify-between bg-theme-text px-8 py-3 text-white">
 			{/* Logo */}
@@ -103,13 +106,15 @@ const Header = () => {
 
 			{/* Right Side */}
 			<div className="flex flex-row items-center space-x-4">
-				{/* Wishlist Button */}
-				<div
-					className="cursor-pointer rounded-full p-2 shadow-md transition-transform hover:scale-105 hover:shadow-lg"
-					onClick={() => navigate("/wishlist")}
-				>
-					<BsBookmarkDashFill size={22} />
-				</div>
+				{/* Wishlist Button - Only show for logged-in clients */}
+				{isClient && (
+					<div
+						className="cursor-pointer rounded-full p-2 shadow-md transition-transform hover:scale-105 hover:shadow-lg"
+						onClick={() => navigate("/wishlist")}
+					>
+						<BsBookmarkDashFill size={22} />
+					</div>
+				)}
 
 				{/* User Section */}
 				{currentUser ? (

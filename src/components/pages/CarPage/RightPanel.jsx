@@ -20,7 +20,10 @@ function RightPanel(props) {
 			{/* Booking Widget for rental cars */}
 			{props.carDetails.listingType === "RENT" && (
 				<div className="mb-6">
-					<BookingWidget car={props.carDetails} />
+					<BookingWidget
+						car={props.carDetails}
+						initialDates={props.initialDates}
+					/>
 				</div>
 			)}
 

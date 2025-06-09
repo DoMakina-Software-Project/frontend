@@ -10,7 +10,15 @@ export const fetchFiveLatestPromotionCars = () =>
 export const searchCars = ({
 	minPrice,
 	maxPrice,
+	minYear,
+	maxYear,
+	minMileage,
+	maxMileage,
 	brandIds,
+	modelSearch,
+	city,
+	fuelType,
+	transmission,
 	page,
 	listingType,
 	startDate,
@@ -20,7 +28,15 @@ export const searchCars = ({
 		params: {
 			minPrice,
 			maxPrice,
+			minYear,
+			maxYear,
+			minMileage,
+			maxMileage,
 			brandIds,
+			modelSearch,
+			city,
+			fuelType,
+			transmission,
 			page,
 			listingType,
 			startDate,
@@ -32,7 +48,8 @@ export const fetchBrands = () => axios.get("/public/brands");
 
 export const fetchHomeCars = () => axios.get("/public/cars/home");
 
-export const getAllBrands = (page = 1) => axios.get("/public/brands", { params: { page } });
+export const getAllBrands = (page = 1) =>
+	axios.get("/public/brands", { params: { page } });
 
 export const getAllBrandsSimple = () => axios.get("/public/brands/simple");
 

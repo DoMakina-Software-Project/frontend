@@ -1,46 +1,70 @@
 import { useState, useEffect } from "react";
 import { BsBookmarkDash, BsBookmarkDashFill } from "react-icons/bs";
 import CarExampleImage from "../../../assets/images/car-example.png";
-import { useNavigate } from "react-router-dom";
-import { addToWishlist, removeFromWishlist, isCarInWishlist } from "../../../api/client";
-import { useApi } from "../../../hooks";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import {
+	addToWishlist,
+	removeFromWishlist,
+	isCarInWishlist,
+} from "../../../api/client";
+import { useApi, useAuth } from "../../../hooks";
 
 const CarCard = ({ car, removeWishlistCar = () => {} }) => {
 	const navigate = useNavigate();
+	const [searchParams] = useSearchParams();
+	const { currentUser, selectedRole } = useAuth();
 
 	const [isInWishlist, setIsInWishlist] = useState(false);
 
 	const { handleApiCall: addToWishlistApiCall } = useApi(addToWishlist);
-	const { handleApiCall: removeFromWishlistApiCall } = useApi(removeFromWishlist);
+	const { handleApiCall: removeFromWishlistApiCall } =
+		useApi(removeFromWishlist);
 	const { handleApiCall: isCarInWishlistApiCall } = useApi(isCarInWishlist);
 
+	// Check if user is logged in and has CLIENT role
+	const isClient = currentUser && selectedRole === "CLIENT";
+
 	useEffect(() => {
-		if (car?.id) {
-			isCarInWishlistApiCall(car.id).then((data) => {
-				if (data) {
-					setIsInWishlist(data.isInWishlist);
-				}
-			}).catch(() => {
-				// If user is not authenticated, default to false
-				setIsInWishlist(false);
-			});
+		// Only check wishlist status if user is a client
+		if (isClient && car?.id) {
+			isCarInWishlistApiCall(car.id)
+				.then((data) => {
+					if (data) {
+						setIsInWishlist(data.isInWishlist);
+					}
+				})
+				.catch(() => {
+					setIsInWishlist(false);
+				});
+		} else {
+			setIsInWishlist(false);
 		}
-	}, [car?.id]);
+	}, [car?.id, isClient]);
 
 	const toggleFavorite = () => {
+		// Only allow wishlist operations for clients
+		if (!isClient) {
+			navigate("/login");
+			return;
+		}
+
 		if (isInWishlist) {
-			removeFromWishlistApiCall(car.id).then(() => {
-				setIsInWishlist(false);
-				removeWishlistCar(car.id);
-			}).catch(() => {
-				// Handle error - maybe show a toast
-			});
+			removeFromWishlistApiCall(car.id)
+				.then(() => {
+					setIsInWishlist(false);
+					removeWishlistCar(car.id);
+				})
+				.catch(() => {
+					// Handle error - maybe show a toast
+				});
 		} else {
-			addToWishlistApiCall(car.id).then(() => {
-				setIsInWishlist(true);
-			}).catch(() => {
-				// Handle error - maybe show a toast or redirect to login
-			});
+			addToWishlistApiCall(car.id)
+				.then(() => {
+					setIsInWishlist(true);
+				})
+				.catch(() => {
+					// Handle error - maybe show a toast
+				});
 		}
 	};
 
@@ -50,19 +74,37 @@ const CarCard = ({ car, removeWishlistCar = () => {} }) => {
 				<img
 					src={car?.images?.[0] || CarExampleImage}
 					alt={car?.brand}
-					className="h-72 w-full object-cover"
-					onClick={() => navigate(`/car/${car.id}`)}
+					className="h-72 w-full cursor-pointer object-cover"
+					onClick={() => {
+						// For rental cars, include the search dates in the URL
+						if (car?.listingType === "RENT") {
+							const startDate = searchParams.get("startDate");
+							const endDate = searchParams.get("endDate");
+							if (startDate && endDate) {
+								navigate(
+									`/car/${car.id}?startDate=${startDate}&endDate=${endDate}`,
+								);
+							} else {
+								navigate(`/car/${car.id}`);
+							}
+						} else {
+							navigate(`/car/${car.id}`);
+						}
+					}}
 				/>
-				<button
-					onClick={toggleFavorite}
-					className="absolute right-4 top-4 rounded-full bg-white p-2"
-				>
-					{isInWishlist ? (
-						<BsBookmarkDashFill size={20} />
-					) : (
-						<BsBookmarkDash size={20} />
-					)}
-				</button>
+				{/* Only show wishlist button for logged-in clients */}
+				{isClient && (
+					<button
+						onClick={toggleFavorite}
+						className="absolute right-4 top-4 rounded-full bg-white p-2"
+					>
+						{isInWishlist ? (
+							<BsBookmarkDashFill size={20} />
+						) : (
+							<BsBookmarkDash size={20} />
+						)}
+					</button>
+				)}
 			</div>
 			<div className="p-4">
 				<div className="mb-2 flex items-start justify-between">
