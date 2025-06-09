@@ -1,7 +1,6 @@
 import { MainLayout } from "../../../components/layouts";
 import { GridDashboardCar } from "../../../components/pages/Dashboard";
 import {
-	FaCalendarAlt,
 	FaPlus,
 	FaClipboardList,
 	FaChartBar,
@@ -22,6 +21,7 @@ import {
 	getSellerUpcomingBookings,
 	getCars,
 	getVerificationStats,
+	getPromotionPrice,
 } from "../../../api/seller";
 
 const DashboardPage = () => {
@@ -33,6 +33,7 @@ const DashboardPage = () => {
 	const [verificationStats, setVerificationStats] = useState(null);
 	const [rejectedCars, setRejectedCars] = useState([]);
 	const [selectedRejectedCar, setSelectedRejectedCar] = useState(null);
+	const [hasPromotionPrice, setHasPromotionPrice] = useState(false);
 
 	// API hooks
 	const { handleApiCall: getStatsApiCall, loading: loadingStats } = useApi(
@@ -44,12 +45,15 @@ const DashboardPage = () => {
 	const { handleApiCall: getCarsApiCall } = useApi(getCars);
 	const { handleApiCall: getVerificationStatsApiCall } =
 		useApi(getVerificationStats);
+	const { handleApiCall: getPromotionPriceApiCall } =
+		useApi(getPromotionPrice);
 
 	useEffect(() => {
 		fetchStats();
 		fetchUpcomingBookings();
 		fetchCars();
 		fetchVerificationStats();
+		fetchPromotionPrice();
 	}, []);
 
 	const fetchStats = async () => {
@@ -82,6 +86,16 @@ const DashboardPage = () => {
 		const data = await getVerificationStatsApiCall();
 		if (data) {
 			setVerificationStats(data);
+		}
+	};
+
+	const fetchPromotionPrice = async () => {
+		try {
+			const data = await getPromotionPriceApiCall();
+			setHasPromotionPrice(!!data);
+		} catch (error) {
+			console.error("Error fetching promotion price:", error);
+			setHasPromotionPrice(false);
 		}
 	};
 
@@ -473,7 +487,7 @@ const DashboardPage = () => {
 					)}
 				</div>
 
-				<GridDashboardCar />
+				<GridDashboardCar hasPromotionPrice={hasPromotionPrice} />
 
 				{/* Rejected Car Details Modal */}
 				<RejectedCarModal
