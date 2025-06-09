@@ -201,8 +201,8 @@ const ClientDashboardPage = () => {
 
 	return (
 		<MainLayout>
-			<div className="min-h-screen bg-gray-50">
-				<div className="mx-auto max-w-7xl px-6 py-8">
+			<div className="flex flex-grow justify-center bg-gray-50">
+				<div className="w-full max-w-6xl px-6 py-8 bg-white shadow-lg rounded-lg my-4">
 					{/* Header */}
 					<div className="mb-8">
 						<h1 className="text-3xl font-bold text-gray-900">
