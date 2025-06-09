@@ -97,7 +97,7 @@ export default function GridDashboardCar() {
 	};
 
 	const handleManageAvailability = (carId) => {
-		navigate(`/seller/rental-availability/${carId}`);
+		navigate(`/seller/car-details/${carId}`);
 	};
 
 	useEffect(() => {
@@ -138,7 +138,7 @@ export default function GridDashboardCar() {
 								handleIsSold(car.id, car.isSold)
 							}
 							onImageClick={() => {
-								navigate(`/car/${car.id}`);
+								navigate(`/seller/car-details/${car.id}`);
 							}}
 							onManageAvailability={() =>
 								handleManageAvailability(car.id)

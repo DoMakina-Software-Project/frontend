@@ -24,8 +24,8 @@ import {
 	DashboardPage,
 	SellCarPage,
 	PromotionPage,
-	RentalAvailabilityPage,
 	BookingManagementPage,
+	CarDetailsPage,
 } from "../pages/private/seller";
 import { ClientDashboardPage, MyBookingsPage } from "../pages/private/client";
 import {
@@ -93,8 +93,8 @@ const RouterManagement = () => {
 					<Route path="list-car" element={<SellCarPage />} />
 					<Route path="promotion/:id" element={<PromotionPage />} />
 					<Route
-						path="rental-availability/:carId?"
-						element={<RentalAvailabilityPage />}
+						path="car-details/:carId"
+						element={<CarDetailsPage />}
 					/>
 					<Route
 						path="bookings"

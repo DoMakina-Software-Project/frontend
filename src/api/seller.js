@@ -1,14 +1,52 @@
 import axios from "./axios";
 
+// Import brands function from public API for use in car editing
+export { getAllBrandsSimple } from "./public";
+
 export const createSellerProfile = (formData) =>
 	axios.post("/seller/profile", formData);
 
 export const getCars = () => axios.get("/seller/cars");
 
+export const getCar = ({ id }) => axios.get(`/seller/cars/${id}`);
+
 export const getVerificationStats = () =>
 	axios.get("/seller/cars/verification/stats");
 
 export const deleteCar = ({ id }) => axios.delete(`/seller/cars/${id}`);
+
+export const updateCar = (carData) => {
+	// Always use FormData for updates to support image operations
+	const formData = new FormData();
+
+	// Add all car fields to FormData
+	Object.keys(carData).forEach((key) => {
+		if (key === "newImages") {
+			// Handle new image files if they exist
+			if (carData.newImages && carData.newImages.length > 0) {
+				carData.newImages.forEach((image) => {
+					formData.append("images", image);
+				});
+			}
+		} else if (key === "removedImageIds") {
+			// Handle removed image IDs
+			if (carData.removedImageIds && carData.removedImageIds.length > 0) {
+				formData.append(
+					"removedImageIds",
+					JSON.stringify(carData.removedImageIds),
+				);
+			}
+		} else if (carData[key] !== undefined && carData[key] !== null) {
+			formData.append(key, carData[key]);
+		}
+	});
+
+	return axios.put(`/seller/cars/${carData.id}`, formData, {
+		headers: {
+			"Content-Type": "multipart/form-data",
+		},
+	});
+};
 
 /**
  * @typedef {Object} CreateCarData
