@@ -415,13 +415,6 @@ const DashboardPage = () => {
 							List a Car
 						</button>
 						<button
-							onClick={() => navigate("rental-availability")}
-							className="flex items-center gap-2 rounded-lg border border-theme-blue px-4 py-2 text-theme-blue transition-colors hover:bg-blue-50"
-						>
-							<FaCalendarAlt size={16} />
-							Manage Availability
-						</button>
-						<button
 							onClick={() => navigate("bookings")}
 							className="flex items-center gap-2 rounded-lg border border-green-600 px-4 py-2 text-green-600 transition-colors hover:bg-green-50"
 						>
