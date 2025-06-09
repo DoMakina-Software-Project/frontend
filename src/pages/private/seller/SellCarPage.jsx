@@ -1,7 +1,7 @@
 import { MainLayout } from "../../../components/layouts";
 import { useEffect, useState } from "react";
 import { createCar } from "../../../api/seller";
-import { getAllBrands } from "../../../api/public";
+import { getAllBrandsSimple } from "../../../api/public";
 import { useApi } from "../../../hooks";
 import { useNavigate } from "react-router-dom";
 import { clearErrors } from "../../../utils/form";
@@ -48,7 +48,7 @@ const SellCarPage = () => {
 		});
 
 	const { handleApiCall: getBrandsApiCall, loading: loadingBrands } =
-		useApi(getAllBrands);
+		useApi(getAllBrandsSimple);
 
 	const navigate = useNavigate();
 
