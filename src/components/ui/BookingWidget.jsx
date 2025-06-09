@@ -144,12 +144,6 @@ const BookingWidget = ({ car, initialDates }) => {
 
 	return (
 		<div className="space-y-6">
-			{/* Price Display */}
-			<div className="rounded-lg bg-theme-blue p-4 text-white">
-				<h3 className="text-xl font-bold">${car.price}/day</h3>
-				<p className="text-blue-100">Available for rent</p>
-			</div>
-
 			{/* Date Selection */}
 			<div className="space-y-4">
 				<div>
@@ -252,7 +246,6 @@ const BookingWidget = ({ car, initialDates }) => {
 						<ul className="space-y-1 text-blue-700">
 							<li>• Free cancellation before pickup</li>
 							<li>• Owner will confirm your booking</li>
-							<li>• Payment on pickup or through PayPal</li>
 						</ul>
 					</div>
 				</div>
