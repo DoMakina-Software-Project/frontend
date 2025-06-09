@@ -68,7 +68,12 @@ const StaffTable = ({ staff, onEdit, onDelete }) => {
 									Edit
 								</button>
 								<button
-									onClick={() => onDelete(member.id)}
+									onClick={() =>
+										onDelete(
+											member.id,
+											`${member.name} ${member.surname}`,
+										)
+									}
 									className="text-red-600 hover:text-red-900"
 								>
 									Delete

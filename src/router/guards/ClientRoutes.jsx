@@ -2,21 +2,26 @@ import { Outlet, Navigate } from "react-router-dom";
 import { useAuth } from "../../hooks";
 
 const ClientRoutes = () => {
-	const { currentUser, selectedRole } = useAuth();
+	const { currentUser, selectedRole, statusCheckError } = useAuth();
+
+	// If there's a status check error, redirect to login
+	if (statusCheckError) {
+		return <Navigate to="/login" />;
+	}
 
 	if (!currentUser) {
 		return <Navigate to="/login" />;
 	}
 
-	if (!currentUser?.roles?.includes("CLIENT") || selectedRole !== "CLIENT") {
-		return <Navigate to="/select-role" />;
-	}
-
-	if (currentUser?.status === "INACTIVE") {
+	if (currentUser.status !== "ACTIVE") {
 		return <Navigate to="/onboarding" />;
 	}
 
-	return <Outlet />;
+	if (currentUser?.roles?.includes("CLIENT") && selectedRole === "CLIENT") {
+		return <Outlet />;
+	}
+
+	return <Navigate to="/select-role" />;
 };
 
 export default ClientRoutes;
