@@ -19,7 +19,7 @@ export const completeBooking = (bookingId) =>
 	axios.patch(`/client/bookings/${bookingId}/complete`);
 
 export const checkBookingAvailability = (availabilityData) =>
-	axios.post("/client/bookings/check-availability", availabilityData);
+	axios.post("/public/bookings/check-availability", availabilityData);
 
 export const getClientUpcomingBookings = () =>
 	axios.get("/client/bookings/upcoming", { params: { userType: "client" } });

@@ -6,12 +6,12 @@ import { useApi, useAuth, useConfirmation } from "../../hooks";
 import { FaCalendarAlt, FaInfoCircle, FaCheckCircle } from "react-icons/fa";
 import toast from "react-hot-toast";
 
-const BookingWidget = ({ car }) => {
+const BookingWidget = ({ car, initialDates }) => {
 	const navigate = useNavigate();
 	const { currentUser } = useAuth();
 	const { showConfirmation } = useConfirmation();
-	const [startDate, setStartDate] = useState("");
-	const [endDate, setEndDate] = useState("");
+	const [startDate, setStartDate] = useState(initialDates?.startDate || "");
+	const [endDate, setEndDate] = useState(initialDates?.endDate || "");
 	const [paymentMethod, setPaymentMethod] = useState("CASH");
 	const [totalPrice, setTotalPrice] = useState(0);
 	const [totalDays, setTotalDays] = useState(0);
@@ -29,6 +29,14 @@ const BookingWidget = ({ car }) => {
 			disableSuccessToast: false,
 			successMessage: "Booking created successfully!",
 		});
+
+	// Update dates when initialDates prop changes
+	useEffect(() => {
+		if (initialDates?.startDate && initialDates?.endDate) {
+			setStartDate(initialDates.startDate);
+			setEndDate(initialDates.endDate);
+		}
+	}, [initialDates]);
 
 	useEffect(() => {
 		if (startDate && endDate) {

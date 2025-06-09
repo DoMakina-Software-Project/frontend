@@ -3,7 +3,7 @@ import LeftSideBar from "../../components/pages/CarPage/LeftSideBar";
 import MainContent from "../../components/pages/CarPage/MainContent";
 import RightPanel from "../../components/pages/CarPage/RightPanel";
 import { MainLayout } from "../../components/layouts";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useSearchParams } from "react-router-dom";
 import { getCar } from "../../api/public";
 import { useApi } from "../../hooks";
 import { FaStar, FaStarHalf } from "react-icons/fa";
@@ -37,10 +37,14 @@ export default function CarPage() {
 	const [rating, setRating] = useState({ averageRating: 0, totalReviews: 0 });
 	const [currentPage, setCurrentPage] = useState(1);
 	const [hasNextPage, setHasNextPage] = useState(false);
-	const [totalPages, setTotalPages] = useState(0);
 
 	const { id } = useParams();
+	const [searchParams] = useSearchParams();
 	const [car, setCar] = useState(null);
+	const [initialDates, setInitialDates] = useState({
+		startDate: "",
+		endDate: "",
+	});
 
 	useEffect(() => {
 		getCarApiCall(id).then((data) => {
@@ -70,9 +74,43 @@ export default function CarPage() {
 			}
 			setCurrentPage(data.currentPage);
 			setHasNextPage(data.hasNextPage);
-			setTotalPages(data.totalPages);
 		}
 	};
+
+	// Function to validate date format (YYYY-MM-DD)
+	const isValidDate = (dateString) => {
+		if (!dateString) return false;
+		const regex = /^\d{4}-\d{2}-\d{2}$/;
+		if (!regex.test(dateString)) return false;
+
+		const date = new Date(dateString);
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+
+		// Check if date is valid and not in the past
+		return date instanceof Date && !isNaN(date) && date >= today;
+	};
+
+	// Extract and validate dates from URL parameters
+	useEffect(() => {
+		const startDate = searchParams.get("startDate");
+		const endDate = searchParams.get("endDate");
+
+		if (
+			startDate &&
+			endDate &&
+			isValidDate(startDate) &&
+			isValidDate(endDate)
+		) {
+			const start = new Date(startDate);
+			const end = new Date(endDate);
+
+			// Ensure end date is after start date
+			if (end > start) {
+				setInitialDates({ startDate, endDate });
+			}
+		}
+	}, [searchParams]);
 
 	const handleLoadMore = () => {
 		if (hasNextPage) {
@@ -94,7 +132,10 @@ export default function CarPage() {
 							name={`${car.brand} ${car.model}`}
 							thumbnail={car.images[currentSlide]}
 						/>
-						<RightPanel carDetails={car} />
+						<RightPanel
+							carDetails={car}
+							initialDates={initialDates}
+						/>
 					</div>
 
 					{/* Reviews Section */}
@@ -123,7 +164,7 @@ export default function CarPage() {
 												</span>
 												<span className="text-sm text-gray-500">
 													{new Date(
-														review.createdAt
+														review.createdAt,
 													).toLocaleDateString()}
 												</span>
 											</div>

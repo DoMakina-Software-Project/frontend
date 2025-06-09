@@ -1,10 +1,13 @@
 import { CarCard } from "../Search";
 import { useState, useEffect } from "react";
 import { getUserWishlist, removeFromWishlist } from "../../../api/client";
-import { useApi, useConfirmation } from "../../../hooks";
+import { useApi, useConfirmation, useAuth } from "../../../hooks";
+import { useNavigate } from "react-router-dom";
 
 export default function WishlistGrid() {
 	const { showConfirmation } = useConfirmation();
+	const { currentUser, selectedRole } = useAuth();
+	const navigate = useNavigate();
 
 	const [cars, setCars] = useState([]);
 	const [hasNextPage, setHasNextPage] = useState(false);
@@ -15,6 +18,9 @@ export default function WishlistGrid() {
 		useApi(getUserWishlist);
 	const { handleApiCall: removeFromWishlistApiCall } =
 		useApi(removeFromWishlist);
+
+	// Check if user is logged in and has CLIENT role
+	const isClient = currentUser && selectedRole === "CLIENT";
 
 	const removeWishlistCar = (carId) => {
 		const car = cars.find((c) => c.id === carId);
@@ -38,21 +44,30 @@ export default function WishlistGrid() {
 		setPage((prevPage) => prevPage + 1);
 	};
 
-	// Load initial wishlist data
+	// Load initial wishlist data - only for clients
 	useEffect(() => {
-		setPage(1);
-		getUserWishlistApiCall(1).then((data) => {
-			if (data) {
-				setCars(data.results || []);
-				setHasNextPage(data.hasNextPage);
-				setTotalItems(data.totalItems);
-			}
-		});
-	}, []);
+		if (isClient) {
+			setPage(1);
+			getUserWishlistApiCall(1)
+				.then((data) => {
+					if (data) {
+						setCars(data.results || []);
+						setHasNextPage(data.hasNextPage);
+						setTotalItems(data.totalItems);
+					}
+				})
+				.catch(() => {
+					// Handle error - maybe redirect to login
+					setCars([]);
+				});
+		} else {
+			setCars([]);
+		}
+	}, [isClient]);
 
 	// Load more data when page changes
 	useEffect(() => {
-		if (page > 1) {
+		if (isClient && page > 1) {
 			getUserWishlistApiCall(page).then((data) => {
 				if (data) {
 					setCars((prev) => [...prev, ...data.results]);
@@ -61,7 +76,31 @@ export default function WishlistGrid() {
 				}
 			});
 		}
-	}, [page]);
+	}, [page, isClient]);
+
+	// Show login message for non-clients
+	if (!isClient) {
+		return (
+			<div className="flex w-full items-center justify-center px-6 lg:px-14">
+				<div className="flex w-full max-w-7xl flex-col items-center justify-center">
+					<div className="text-center">
+						<h2 className="mb-4 text-2xl font-semibold text-gray-700">
+							Access Your Wishlist
+						</h2>
+						<p className="mb-6 text-gray-600">
+							Please log in as a client to view your saved cars.
+						</p>
+						<button
+							onClick={() => navigate("/login")}
+							className="rounded-lg bg-theme-blue px-6 py-3 text-white transition-colors hover:bg-blue-700"
+						>
+							Log In
+						</button>
+					</div>
+				</div>
+			</div>
+		);
+	}
 
 	// Loading state for initial load
 	if (loading && cars.length === 0) {
