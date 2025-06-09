@@ -113,7 +113,7 @@ const SellerOnboardingPage = () => {
 		};
 
 		if (isBusiness.value) {
-			if (!businessName || !businessAddress || !description) {
+			if (!businessName.value || !businessAddress.value || !description.value) {
 				console.error("Required business fields are missing");
 				return;
 			}
@@ -215,7 +215,6 @@ const SellerOnboardingPage = () => {
 									formState={formState}
 									setFormState={setFormState}
 									wrapperClassName="w-auto"
-									required
 								/>
 								<label htmlFor="isBusiness">
 									<span className="text-[13px] text-theme-light-gray">
