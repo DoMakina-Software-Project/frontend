@@ -34,6 +34,7 @@ import {
 	StaffEditBrandPage,
 	StaffCreateBrandPage,
 	StaffCarVerificationPage,
+	UserManagementPage,
 } from "../pages/private/staff";
 import { OnboardingPage } from "../pages/onboarding";
 import { SelectRolePage } from "../pages/private";
@@ -118,6 +119,7 @@ const RouterManagement = () => {
 						path="car-verification"
 						element={<StaffCarVerificationPage />}
 					/>
+					<Route path="users" element={<UserManagementPage />} />
 				</Route>
 
 				{/* Add the super admin routes */}
@@ -128,6 +130,7 @@ const RouterManagement = () => {
 						<Route path="create" element={<CreateStaffPage />} />
 						<Route path="edit/:id" element={<EditStaffPage />} />
 					</Route>
+					<Route path="users" element={<UserManagementPage />} />
 				</Route>
 
 				{/* Add the 404 page */}

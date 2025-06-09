@@ -74,7 +74,12 @@ const Header = () => {
 			roles: ["STAFF", "SUPERADMIN"],
 		},
 		{
-			title: "Staff",
+			title: "User Management",
+			link: "/staff/users",
+			roles: ["STAFF", "SUPERADMIN"],
+		},
+		{
+			title: "Staff Management",
 			link: "/admin/staff",
 			roles: ["SUPERADMIN"],
 		},
@@ -87,6 +92,11 @@ const Header = () => {
 			title: "Log out",
 			onClick: handleLogout,
 			roles: ["ALL"],
+		},
+		{
+			title: "Promotion Prices",
+			link: "/staff/promotion-prices",
+			roles: ["STAFF", "SUPERADMIN"],
 		},
 	];
 

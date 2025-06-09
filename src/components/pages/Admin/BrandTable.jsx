@@ -44,7 +44,9 @@ const BrandTable = ({ brands, onEdit, onDelete }) => {
 									Edit
 								</button>
 								<button
-									onClick={() => onDelete(brand.id)}
+									onClick={() =>
+										onDelete(brand.id, brand.name)
+									}
 									className="text-red-600 hover:text-red-900"
 								>
 									Delete

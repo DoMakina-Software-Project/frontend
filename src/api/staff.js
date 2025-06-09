@@ -1,7 +1,8 @@
 import axios from "./axios";
 
 //Brands
-export const getBrands = (page = 1) => axios.get("/staff/brands", { params: { page } });
+export const getBrands = (page = 1) =>
+	axios.get("/staff/brands", { params: { page } });
 
 export const createBrand = (formData) =>
 	axios.post("/staff/brands", formData, {
@@ -50,3 +51,23 @@ export const rejectCar = ({ id, reason }) =>
 
 export const getVerificationStats = () =>
 	axios.get("/staff/cars/verification/stats");
+
+// User Management (Staff)
+export const getAllUsers = ({ page = 1, role = null }) => {
+	const params = { page };
+	if (role) params.role = role;
+	return axios.get("/staff/users", { params });
+};
+
+export const getUserById = (id) => axios.get(`/staff/users/${id}`);
+
+export const getUsersByRole = ({ role, page = 1 }) =>
+	axios.get(`/staff/users/role/${role}`, { params: { page } });
+
+export const updateUser = ({ id, userData }) =>
+	axios.put(`/staff/users/${id}`, userData);
+
+export const updateUserStatus = ({ id, status }) =>
+	axios.patch(`/staff/users/${id}/status`, { status });
+
+export const getUserStatistics = () => axios.get("/staff/users/statistics");

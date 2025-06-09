@@ -10,8 +10,8 @@ export const AuthProvider = ({ children }) => {
 
 	const [currentUser, setCurrentUser] = useState(null);
 	const [selectedRole, setSelectedRole] = useState(null);
-
 	const [loading, setLoading] = useState(true);
+	const [statusCheckError, setStatusCheckError] = useState(null);
 
 	const fetchUser = async () => {
 		try {
@@ -24,18 +24,36 @@ export const AuthProvider = ({ children }) => {
 
 				setCurrentUser(user);
 				setSelectedRole(selectedRole);
+				setStatusCheckError(null);
 			} else {
 				throw new Error("User not found");
 			}
-		} catch {
-			setCurrentUser(null);
-			setSelectedRole(null);
+		} catch (error) {
+			// Check if this is a status-related error
+			if (error.response?.data?.shouldLogout) {
+				setStatusCheckError(error.response.data.message);
+				setCurrentUser(null);
+				setSelectedRole(null);
+				localStorage.removeItem("selectedRole");
+			} else {
+				setCurrentUser(null);
+				setSelectedRole(null);
+			}
 		}
 	};
 
 	const handleLogout = async () => {
-		await handleLogoutApiCall();
-		setCurrentUser(null);
+		try {
+			await handleLogoutApiCall();
+		} catch {
+			// Even if logout API fails, clear local state
+			console.warn("Logout API failed, but clearing local state");
+		} finally {
+			setCurrentUser(null);
+			setSelectedRole(null);
+			setStatusCheckError(null);
+			localStorage.removeItem("selectedRole");
+		}
 	};
 
 	const handleSelectRole = (
@@ -56,6 +74,38 @@ export const AuthProvider = ({ children }) => {
 		return null;
 	};
 
+	const clearStatusError = () => {
+		setStatusCheckError(null);
+	};
+
+	// Setup axios interceptor to handle status check responses
+	useEffect(() => {
+		const setupInterceptor = async () => {
+			const { default: axios } = await import("../api/axios");
+
+			const interceptor = axios.interceptors.response.use(
+				(response) => response,
+				(error) => {
+					// Handle forced logout scenarios
+					if (error.response?.data?.shouldLogout) {
+						setStatusCheckError(error.response.data.message);
+						setCurrentUser(null);
+						setSelectedRole(null);
+						localStorage.removeItem("selectedRole");
+					}
+					return Promise.reject(error);
+				},
+			);
+
+			// Cleanup function to remove interceptor
+			return () => {
+				axios.interceptors.response.eject(interceptor);
+			};
+		};
+
+		setupInterceptor();
+	}, []);
+
 	useEffect(() => {
 		const initialFetch = async () => {
 			await fetchUser();
@@ -71,6 +121,8 @@ export const AuthProvider = ({ children }) => {
 		logout: handleLogout,
 		selectedRole,
 		handleSelectRole,
+		statusCheckError,
+		clearStatusError,
 	};
 
 	return (
@@ -80,7 +132,22 @@ export const AuthProvider = ({ children }) => {
 					<LoadingIndicator />
 				</div>
 			) : (
-				children
+				<>
+					{statusCheckError && (
+						<div className="fixed left-0 right-0 top-0 z-50 bg-red-500 p-4 text-center text-white">
+							<div className="mx-auto flex max-w-4xl items-center justify-between">
+								<span>{statusCheckError}</span>
+								<button
+									onClick={clearStatusError}
+									className="ml-4 text-white hover:text-gray-200"
+								>
+									×
+								</button>
+							</div>
+						</div>
+					)}
+					{children}
+				</>
 			)}
 		</AuthContext.Provider>
 	);

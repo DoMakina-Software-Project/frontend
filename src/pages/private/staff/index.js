@@ -3,3 +3,4 @@ export { default as StaffBrandsPage } from "./StaffBrandsPage";
 export { default as StaffCreateBrandPage } from "./StaffCreateBrandPage";
 export { default as StaffEditBrandPage } from "./StaffEditBrandPage";
 export { default as StaffCarVerificationPage } from "./StaffCarVerificationPage";
+export { default as UserManagementPage } from "./UserManagementPage";
