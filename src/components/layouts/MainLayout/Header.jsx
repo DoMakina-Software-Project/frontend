@@ -71,11 +71,6 @@ const Header = () => {
 			roles: ["SELLER"],
 		},
 		{
-			title: "Rental",
-			link: "/seller/rental-availability",
-			roles: ["SELLER"],
-		},
-		{
 			title: "Bookings",
 			link: "/seller/bookings",
 			roles: ["SELLER"],
@@ -109,11 +104,6 @@ const Header = () => {
 			title: "Log out",
 			onClick: handleLogout,
 			roles: ["ALL"],
-		},
-		{
-			title: "Promotion Prices",
-			link: "/staff/promotion-prices",
-			roles: ["STAFF", "SUPERADMIN"],
 		},
 	];
 

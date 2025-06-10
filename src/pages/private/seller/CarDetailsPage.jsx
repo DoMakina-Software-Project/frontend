@@ -74,7 +74,9 @@ const CarDetailsPage = () => {
 	const {
 		handleApiCall: getAvailabilityApiCall,
 		loading: loadingAvailability,
-	} = useApi(getAvailableDatesInRange);
+	} = useApi(getAvailableDatesInRange, {
+		ignoreErrors: true,
+	});
 
 	useEffect(() => {
 		if (carId) {
