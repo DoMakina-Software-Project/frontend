@@ -308,6 +308,7 @@ const BookingWidget = ({ car, initialDates }) => {
 							value={paymentMethod}
 							onChange={(e) => setPaymentMethod(e.target.value)}
 							className="w-full rounded-lg border border-gray-300 p-3 focus:border-theme-blue focus:outline-none"
+							disabled
 						>
 							<option value="CASH">Cash on Pickup</option>
 						</select>
