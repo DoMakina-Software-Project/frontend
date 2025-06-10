@@ -50,7 +50,7 @@ const StaffPage = () => {
 	};
 
 	const fetchStaff = async (page = 1) => {
-		const data = await getStaffApiCall(page);
+		const data = await getStaffApiCall({ page });
 		if (data) {
 			setStaff(data.results || []);
 			setTotalPages(data.totalPages || 1);
