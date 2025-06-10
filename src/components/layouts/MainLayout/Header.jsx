@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth, useConfirmation } from "../../../hooks";
 import { Logo } from "../../common";
 import { BsBookmarkDashFill } from "react-icons/bs";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { FaUser } from "react-icons/fa";
 
 const Header = () => {
@@ -11,6 +11,23 @@ const Header = () => {
 	const { showConfirmation } = useConfirmation();
 	const navigate = useNavigate();
 	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+	const dropdownRef = useRef(null);
+
+	useEffect(() => {
+		const handleClickOutside = (event) => {
+			if (
+				dropdownRef.current &&
+				!dropdownRef.current.contains(event.target)
+			) {
+				setIsDropdownOpen(false);
+			}
+		};
+
+		document.addEventListener("mousedown", handleClickOutside);
+		return () => {
+			document.removeEventListener("mousedown", handleClickOutside);
+		};
+	}, []);
 
 	const handleLogout = () => {
 		showConfirmation({
@@ -128,7 +145,7 @@ const Header = () => {
 
 				{/* User Section */}
 				{currentUser ? (
-					<div className="relative">
+					<div className="relative" ref={dropdownRef}>
 						{/* User Icon */}
 						<button
 							onClick={() => setIsDropdownOpen(!isDropdownOpen)}
