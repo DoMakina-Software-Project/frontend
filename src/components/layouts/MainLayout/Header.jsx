@@ -4,7 +4,7 @@ import { useAuth, useConfirmation } from "../../../hooks";
 import { Logo } from "../../common";
 import { BsBookmarkDashFill } from "react-icons/bs";
 import { useState } from "react";
-import { CiUser } from "react-icons/ci";
+import { FaUser } from "react-icons/fa";
 
 const Header = () => {
 	const { currentUser, logout, selectedRole } = useAuth();
@@ -134,7 +134,7 @@ const Header = () => {
 							onClick={() => setIsDropdownOpen(!isDropdownOpen)}
 							className="flex items-center space-x-2"
 						>
-							<CiUser size={22} />
+							<FaUser size={22} />
 							<p>{currentUser.displayName}</p>
 						</button>
 

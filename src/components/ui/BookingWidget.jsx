@@ -310,7 +310,6 @@ const BookingWidget = ({ car, initialDates }) => {
 							className="w-full rounded-lg border border-gray-300 p-3 focus:border-theme-blue focus:outline-none"
 						>
 							<option value="CASH">Cash on Pickup</option>
-							<option value="PAYPAL">PayPal</option>
 						</select>
 					</div>
 
