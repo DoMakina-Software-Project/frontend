@@ -46,7 +46,9 @@ const DashboardPage = () => {
 	const { handleApiCall: getVerificationStatsApiCall } =
 		useApi(getVerificationStats);
 	const { handleApiCall: getPromotionPriceApiCall } =
-		useApi(getPromotionPrice);
+		useApi(getPromotionPrice, {
+			ignoreErrors: true,
+		});
 
 	useEffect(() => {
 		fetchStats();
